@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.rcParams['figure.figsize']=10,8
+plt.rcParams['figure.figsize']=(10,8)
 
 plt.rcParams['axes.labelsize']=20
 plt.rcParams['axes.titlesize']=25
