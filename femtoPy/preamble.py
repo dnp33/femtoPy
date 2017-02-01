@@ -17,11 +17,17 @@ plt.rcParams['xtick.major.size']=10
 plt.rcParams['xtick.minor.size']=7
 plt.rcParams['xtick.major.width']=2
 plt.rcParams['xtick.minor.width']=2
+plt.rcParams['xtick.minor.top']=True
+plt.rcParams['xtick.minor.bottom']=True
+
+
 
 plt.rcParams['ytick.major.size']=10
 plt.rcParams['ytick.minor.size']=7
 plt.rcParams['ytick.major.width']=2
 plt.rcParams['ytick.minor.width']=2
+plt.rcParams['ytick.minor.top']=True
+plt.rcParams['ytick.minor.bottom']=True
 
 plt.rcParams['xtick.direction']='out'
 plt.rcParams['ytick.direction']='out'
