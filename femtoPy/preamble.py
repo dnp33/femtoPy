@@ -32,8 +32,6 @@ plt.rcParams['xtick.major.width']=2
 plt.rcParams['xtick.minor.width']=2
 plt.rcParams['xtick.minor.visible']=True
 
-
-
 plt.rcParams['ytick.major.size']=12
 plt.rcParams['ytick.minor.size']=6
 plt.rcParams['ytick.major.width']=2
