@@ -1,25 +1,15 @@
 import numpy as np
 import matplotlib as matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.ticker
 
-def setTicks(ax):
-    locator=matplotlib.ticker.AutoMinorLocator(n=2)
-    ax.xaxis.set_minor_locator(locator)
-    ax.yaxis.set_minor_locator(locator)
-
-def newFig(x=10,y=8):
-    fig,ax=plt.subplots(figsize=(x,y))
-    setTicks(ax)
-
-    return fig,ax
-
-plt.rcParams['figure.figsize']=(10,8)
+plt.rcParams['figure.figsize']=[10,8]
 
 plt.rcParams['axes.labelsize']=23
 plt.rcParams['axes.titlesize']=30
 plt.rcParams['axes.grid']=True
 plt.rcParams['axes.linewidth']=3
+plt.rcParams['axes.xmargin']=0
+plt.rcParams['axes.ymargin']=.05
 
 plt.rcParams['lines.linewidth']=3
 
@@ -43,7 +33,7 @@ plt.rcParams['ytick.direction']='out'
 
 plt.rcParams['legend.fontsize']=20
 plt.rcParams['legend.fancybox']=True
-
+plt.rcParams['legend.scatterpoints']=1
 
 #from imp import find_module
 #from imp import load_module
