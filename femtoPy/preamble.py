@@ -9,7 +9,7 @@ plt.rcParams['axes.titlesize']=30
 plt.rcParams['axes.grid']=True
 plt.rcParams['axes.linewidth']=3
 plt.rcParams['axes.xmargin']=0
-plt.rcParams['axes.ymargin']=.05
+plt.rcParams['axes.ymargin']=.01
 
 plt.rcParams['lines.linewidth']=3
 
