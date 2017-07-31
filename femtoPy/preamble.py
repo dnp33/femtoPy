@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib as matplotlib
 import matplotlib.pyplot as plt
 
+np.seterr(all='raise')
+
 plt.rcParams['figure.figsize']=[10,8]
 
 plt.rcParams['axes.labelsize']=23
