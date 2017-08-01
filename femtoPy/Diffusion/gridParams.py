@@ -1,3 +1,5 @@
+import numpy as np  
+
 'class to hold the grid parameters for the FDTD code'
 class gridParams:
     def __init__(self,dt=0.05,dy=0.01,y_min=0,y_max=5,t_min=0,t_max=100):

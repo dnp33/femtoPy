@@ -1,3 +1,5 @@
+import numpy as np
+
 class parameters:
     'class which contains coefficients relevant to solve the diffusion equation in semiconductors'
     def __init__(self):

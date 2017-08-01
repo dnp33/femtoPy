@@ -1,4 +1,5 @@
 from scipy.integrate import cumtrapz
+import numpy as np
 
 'class to calculate electric field from 2 charge distributions'
 class gauss:

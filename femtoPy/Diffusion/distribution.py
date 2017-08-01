@@ -1,5 +1,6 @@
 import scipy.linalg as linalg
 import scipy.sparse as sparse
+import numpy as np
 
 'class to hold the grid parameters for the FDTD code'
 class distribution:

@@ -1,4 +1,5 @@
 from scipy.special import erfcx
+import numpy as np
 
 'analytic expression for initial carrier density with monomolecular'
 'recombination'
