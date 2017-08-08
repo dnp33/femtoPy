@@ -1,0 +1,77 @@
+import numpy as np
+
+'class to hold the information for each distribution'
+class Distribution:
+    def __init__(self,grid,d0=0,args=[],s=8.5e3,u_ab=0.0388,tau=2.1e-9,T=300,D=0,q=-1):
+        'transport parameters'
+        self.s=s         # surface recombination velocity
+        self.u_ab=u_ab   # mobility
+        self.q=q         # charge
+        self.T=T         # Temperature
+        if type(D) == int or type(D) == float:
+            if D==0:
+                self.D=np.array(u_ab*1.38e-23*T/1.6e-19)
+            else:
+                self.D=D+np.zeros(grid.t.size)
+        else:
+            self.D=D
+        self.tau=tau
+        'matrix of densities'
+        self.density=np.matrix(np.zeros([grid.y.size,grid.t.size]))
+
+        'initial density as a function of depth'
+        if type(d0) == int or type(d0) == float:
+            self.density[:,0]=np.zeros(grid.y.size)+d0
+        elif type(d0) == type(self.density):
+            self.density[:,0]=d0
+        else: # if function given
+            self.density[:,0]=d0(grid.y,args)
+        return
+
+'class to hold the grid parameters for the FDTD code'
+class Grid:
+    def __init__(self,dt=0.05,dy=0.01,y_min=0,y_max=5,t_min=0,t_max=100):
+        'grid parameters'
+        self.dt = dt # grid size for time
+        self.dy = dy # grid size for space
+        self.y = np.asmatrix(np.arange(y_min,y_max+dy,dy)).T # y-array for grid
+        self.t = np.asmatrix(np.arange(t_min,t_max+dt,dt)) # t-array for grid
+
+        'Derivative stencils for interior points'
+        self.D1=np.zeros((3,self.y.size))
+        self.D1=self.zeros.copy()
+        self.D1[0,2:]=1
+        self.D1[2,:-2]=-1
+        self.D1=self.D1*self.dt/4./self.dy
+        
+        self.D2=np.zeros((3,self.y.size))
+        self.D2[0,2:]=1
+        self.D2[1,1:-1]=-2
+        self.D2[2,:-2]=1
+        self.D2=self.D2*self.dt/self.dy**2/2.
+        
+        return
+
+from scipy.integrate import cumtrapz
+'class to calculate electric field from 2 charge distributions'
+class Field:
+    def __init__(self,grid,E0='undefined'):
+        'initial field'
+        self.field = np.matrix(np.zeros([grid.y.size,grid.t.size]))
+        
+        if type(E0) != str:
+            if type(E0) == type(self.field):
+                self.field[:,0]=E0
+            elif type(E0) == int or type(E0) == float:
+                self.field[:,0]=self.field[:,0]+E0
+            elif E0.size == self.field[:,0].size:
+                self.field[:,0]=np.asmatrix(E0)
+        return
+
+    def solveGauss(self,grid,rho1,rho2,i,eps_r=1,E_ext='none'):
+        rho=rho1.density[:,i]*rho1.q+rho2.density[:,i]*rho2.q/8.85e-12/eps_r
+        self.field[:,i]=np.asmatrix(cumtrapz(np.append(0,rho),dx=grid.y[1]-grid.y[0],axis=0)).T
+        if E_ext != 'none':
+            self.field[:,i]=self.field[:,i]+E_ext
+        
+        return

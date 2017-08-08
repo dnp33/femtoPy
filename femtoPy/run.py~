@@ -1,0 +1,28 @@
+from femtoPy.preamble import *
+import diffusion as diff
+import time as time
+
+dt=.05
+dy=.01
+y_min=0
+y_max=5
+t_min=0
+t_max=100
+
+grid=diff.classes.Grid(dt=dt,dy=dy,y_min=y_min,y_max=y_max,t_min=t_min,t_max=t_max)
+
+N=np.arange(t_min,t_max,dt).size
+
+def exp(x,alpha):
+    y=10*np.exp(-x*alpha)
+    return y
+
+elec=diff.classes.Distribution(grid=grid,d0=np.exp(-grid.y*1.62),s=1e-2,D=1.004e-3,tau=2100,q=-1.6e-19)
+hole=diff.classes.Distribution(grid=grid,d0=np.exp(-grid.y*1.62),s=1e-2,D=1.004e-2,tau=2100,q=1.6e-19)
+E=diff.classes.Field(grid=grid,E0=np.asmatrix(np.zeros(grid.y.size)).T)
+
+t0=time.time()
+for i in range(0,grid.t.size-1):
+    E.solveGauss(grid,elec,hole,i)
+    elec.density[:,i+1]=diff.step.NoField_BiRec(grid,elec,i)
+    hole.density[:,i+1]=diff.step.NoField_BiRec(grid,hole,i)

@@ -1,7 +1,8 @@
 from scipy.special import erfcx
 import numpy as np
 
-'analytic expression for initial carrier density with monomolecular recombination'
+'analytic expression for initial carrier density with monomolecular 
+recombination'
 def dist(x,args):
     #args[0]= time  args[1]=absorption coefficient  
     t=args[0]

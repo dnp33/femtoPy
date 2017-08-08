@@ -1,0 +1,131 @@
+import numpy as np
+import scipy.linalg as linalg
+import scipy.sparse as sparse
+'solve system of equations for a banded matrix'
+def solve(matrix,density):
+    # LHS matrix
+    LHS=-matrix.copy()
+    LHS[1,:]=1+LHS[1,:]
+    
+    # RHS matrix
+    RHS=matrix
+    RHS[1,:]=1+RHS[1,:]
+    RHS=sparse.diags([RHS[0,1:],RHS[1,:],RHS[2,:-1]],[1,0,-1]).dot(density)
+
+    # solve linear system
+    soltn=np.asmatrix(linalg.solve_banded((1,1),LHS,RHS,overwrite_ab=True,overwrite_b=True,check_finite=False))
+
+    return soltn
+
+# second derivative matrix (interior points)
+def diffusionTerm(grid,dist,i):
+    return grid.D2.copy()*dist.D[i]
+
+# Boundary Conditions (only written for surface currently)
+def boundaryTerm(matrix,dist,i):
+    matrix[0,1]=2*C
+    matrix[1,0]=-2*C*(1+grid.dy*dist.s/dist.D[i])
+    return matrix
+
+def mono(grid,matrix,dist,i):
+    matrix[1,:]=matrix[1,:]-grid.dt/dist.tau
+    return matrix
+
+def bi(grid,matrix,dist,i):
+    matrix[1,:]=matrix[1,:]-grid.dt*np.asarray(dist.density[:,i])[:,0]/dist.tau
+    return matrix
+
+# def field(grid,matrix,dist,Efield,i,Eps=1):
+
+'build matrix using an external field with no bulk recombination'
+def Field_NoRec(grid,dist,E_field,i):
+    # second derivative matrix (interior points)
+    C=dist.D[i]*grid.dt/grid.dy**2/2.
+    matrix=grid.D2*dist.D[i]
+
+    # first derivative matrix and field (interior points only)
+    buf=grid.D1
+    buf[0,:]=buf[0,:]*E_field[:,i]*dist.q
+    buf[2,:]=buf[2,:]*E_field[:,i]*dist.q
+    matrix=matrix-buf
+
+    # Boundary Conditions (only written for surface currently)
+    matrix[0,1]=2*C
+    matrix[1,0]=-2*C*(1+grid.dy*dist.s/dist.D[i])
+
+    return solve(matrix,dist.density[:,i])
+
+'build matrix using no external field and monomolecular bulk recombination'
+def NoField_MonoRec(grid,dist,i):
+    # second derivative matrix (interior points)
+    C=dist.D[i]*grid.dt/grid.dy**2/2.
+    matrix=grid.D2*dist.D[i]
+
+    # Boundary Conditions (only written for surface currently)
+    matrix[0,1]=2*C
+    matrix[1,0]=-2*C*(1+grid.dy*dist.s/dist.D[i])
+    
+    # Bulk recombination and current terms
+    matrix[1,:]=matrix[1,:]-grid.dt/dist.tau
+
+    return solve(matrix,dist.density[:,i])
+
+'build matrix using an external field and monomolecular bulk recombination'
+def Field_MonoRec(grid,dist,E_field,i):
+    # second derivative matrix (interior points)
+    C=dist.D[i]*grid.dt/grid.dy**2/2.
+    matrix=grid.D2*dist.D[i]
+
+    # first derivative matrix and field (interior points only)
+    buf=grid.D1
+    buf[0,:]=buf[0,:]*E_field[i]*dist.q
+    buf[2,:]=buf[2,:]*E_field[i]*dist.q
+    matrix=matrix-buf
+
+    # Boundary Conditions (only written for surface currently)
+    matrix[0,1]=2*C
+    matrix[1,0]=-2*C*(1+grid.dy*dist.s/dist.D[i])
+    
+    # Bulk recombination and current terms
+    matrix[1,:]=matrix[1,:]-grid.dt/dist.tau
+
+    return solve(matrix,dist.density[:,i])
+
+'build matrix using no external field and bimolecular bulk recombination'
+def NoField_BiRec(grid,dist,i):
+    'step forward diffusion equation in time with no field'
+    # second derivative matrix (interior points)
+    C=dist.D[i]*grid.dt/grid.dy**2/2.
+    matrix=grid.D2*dist.D[i]
+
+    # Boundary Conditions (only written for surface currently)
+    matrix[0,1]=2*C
+    matrix[1,0]=-2*C*(1+grid.dy*dist.s/dist.D[i])
+    
+    # Bulk recombination and current terms
+    matrix[1,:]=matrix[1,:]-grid.dt*np.asarray(dist.density[:,i])[:,0]/dist.tau
+
+    return solve(matrix,dist.density[:,i])
+
+'build matrix using an external field and bimolecular bulk recombination'
+def Field_BiRec(grid,dist,E_field,i):
+    'step forward diffusion equation in time with no field'
+    # second derivative matrix (interior points)
+    C=dist.D[i]*grid.dt/grid.dy**2/2.
+    matrix=grid.D2*dist.D[i]
+
+    # first derivative matrix and field (interior points only)
+    buf=grid.D1
+    buf[0,:]=buf[0,:]*E_field*dist.q
+    buf[2,:]=buf[2,:]*E_field*dist.q
+    matrix=matrix-buf
+
+
+    # Boundary Conditions (only written for surface currently)
+    matrix[0,1]=2*C
+    matrix[1,0]=-2*C*(1+grid.dy*dist.s/dist.D[i])
+    
+    # Bulk recombination and current terms
+    matrix[1,:]=matrix[1,:]-grid.dt*np.asarray(dist.density[:,i])[:,0]/dist.tau
+    
+    return solve(matrix,dist.density[:,i])
