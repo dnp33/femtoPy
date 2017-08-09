@@ -1,2 +1,0 @@
-pip install --upgrade software/femtoPy/.
-python Work/simulation/Diffusion/test.py

@@ -1,5 +1,5 @@
 from femtoPy.preamble import *
-import diffusion as diff
+from .. import diffusion as diff
 
 import time as time
 
