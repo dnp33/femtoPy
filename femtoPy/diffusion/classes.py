@@ -13,26 +13,26 @@ class Grid:
         self.t = np.asmatrix(np.arange(t_min,t_max+dt,dt)) # t-array for grid
 
         'Derivative stencils for interior points'
-        self.D1=np.zeros((3,self.y.size))
-        self.D1[0,2:]=1
-        self.D1[2,:-2]=-1
-        self.D1=self.D1*self.dt/4./self.dy
+        self.D1=bm.BandMat(1,1,np.zeros((3,self.y.size)))
+        self.D1.data[0,2:]=1
+        self.D1.data[2,:-2]=-1
+        self.D1.data=self.D1.data*self.dt/4./self.dy
         
-        self.D2=np.zeros((3,self.y.size))
-        self.D2[0,2:]=1
-        self.D2[1,1:-1]=-2
-        self.D2[2,:-2]=1
-        self.D2=self.D2*self.dt/self.dy**2/2.
+        self.D2=bm.BandMat(1,1,np.zeros((3,self.y.size)))
+        self.D2.data[0,2:]=1
+        self.D2.data[1,1:-1]=-2
+        self.D2.data[2,:-2]=1
+        self.D2.data=self.D2.data*self.dt/self.dy**2/2.
 
         'Identity matrix'
-        self.I=np.zeros((3,self.y.size))
-        self.I[1,:]=self.I[1,:]+1
+        self.I=bm.BandMat(1,1,np.zeros((3,self.y.size)))
+        self.I.data[1,:]=self.I.data[1,:]+1
         
         return
-
+    
 'class to hold the information for each distribution'
 class Distribution:
-    def __init__(self,grid=Grid(),d0=0,args=[],s=8.5e3,u_ab=0.0388,A=2.1e-9,B=2.1e-12,C=2.1e-15,T=300,D=0,q=-1):
+    def __init__(self,grid,d0=0,args=[],s=8.5e3,u_ab=0.0388,A=2.1e-9,B=2.1e-12,C=2.1e-15,T=300,D=0,q=-1):
         'grid parameters'
         self.grid=grid
         'transport parameters'
@@ -72,61 +72,69 @@ class Distribution:
 
     'set up the second order derivative matrix'
     def dif_matrix(self):
-        self.LHS=self.LHS-self.grid.D2.copy()*self.D[self.i+1]
-        self.RHS=self.RHS+self.grid.D2.copy()*self.D[self.i]
+        self.LHS=self.LHS.__sub__(self.grid.D2.copy()*self.D[self.i+1])
+        self.RHS=self.RHS.__add__(self.grid.D2.copy()*self.D[self.i])
         return
 
     'Recombination terms (on diagonal matrix elements)'
     def mono(self):
-        self.LHS[1,:]=self.LHS[1,:]+self.grid.dt*self.A/2.
-        self.RHS[1,:]=self.RHS[1,:]-self.grid.dt*self.A/2.
+        self.LHS.data[1,:]=self.LHS.data[1,:]+self.grid.dt*self.A/2.
+        self.RHS.data[1,:]=self.RHS.data[1,:]-self.grid.dt*self.A/2.
         return
     def bi(self):
         dens=np.asarray(self.dist.density[:,self.i])[:,0]
         dens=dens*dens
-        self.LHS[1,:]=self.LHS[1,:]+self.grid.dt*dens*self.B/2.
-        self.RHS[1,:]=self.RHS[1,:]-self.grid.dt*dens*self.B/2.
+        self.LHS.data[1,:]=self.LHS.data[1,:]+self.grid.dt*dens*self.B/2.
+        self.RHS.data[1,:]=self.RHS.data[1,:]-self.grid.dt*dens*self.B/2.
         return
     def tri(self):
         dens=np.asarray(self.dist.density[:,self.i])[:,0]
         dens=dens*dens*dens
-        self.LHS[1,:]=self.LHS[1,:]+self.grid.dt*dens*self.C/2.
-        self.RHS[1,:]=self.RHS[1,:]-self.grid.dt*dens*self.C/2.
+        self.LHS.data[1,:]=self.LHS.data[1,:]+self.grid.dt*dens*self.C/2.
+        self.RHS.data[1,:]=self.RHS.data[1,:]-self.grid.dt*dens*self.C/2.
         return
     
     'Source term'
     def source(self,S):
-        self.LHS[1,:]=self.LHS[1,:]-self.grid.dt*S/2.
-        self.RHS[1,:]=self.RHS[1,:]+self.grid.dt*S/2.
+        self.LHS.data[1,:]=self.LHS.data[1,:]-self.grid.dt*S/2.
+        self.RHS.data[1,:]=self.RHS.data[1,:]+self.grid.dt*S/2.
         return
 
     'Electric field term'
     def eField(self,E):
-        M=self.grid.D1.copy()
-        M[0,:]=M[0,:]*E*self.q
-        M[2,:]=M[2,:]*E*self.q
-        self.LHS=self.LHS-M
-        self.RHS=self.RHS+M
+        E=np.asarray(E.field[:,self.i])[:,0]
+        E_buf=np.zeros((3,E.size))
+        E_buf[1,:]=E
+        E=bm.BandMat(1,1,E_buf)
+        M=self.grid.D1.copy()*self.q
+        M1=bm.BandMat(1,1,bm.dot_mm(E,M).data[1:4,:])
+        M2=bm.BandMat(1,1,bm.dot_mm(M,E).data[1:4,:])
+        M2.data[1,:]=M2.data[1,:]*self.density[:,self.i]
+        self.LHS=self.LHS.__sub__(M1)
+        self.LHS=self.LHS.__sub__(M2)
+        self.RHS=self.RHS.__add__(M1)
+        self.RHS=self.RHS.__add__(M2)
         return
 
     'Boundary terms'
     def boundary(self):
         C=self.grid.dt*self.D[self.i]/self.grid.dy/self.grid.dy
-        self.LHS[0,1]=self.LHS[0,1]-2*C
-        self.LHS[1,0]=self.LHS[1,0]+2*C*(1+self.grid.dy*self.s/self.D[self.i])
-        self.RHS[0,1]=self.RHS[0,1]+2*C
-        self.RHS[1,0]=self.RHS[1,0]-2*C*(1+self.grid.dy*self.s/self.D[self.i])
+        self.LHS.data[0,1]=self.LHS.data[0,1]-2*C
+        self.LHS.data[1,0]=self.LHS.data[1,0]+2*C*(1+self.grid.dy*self.s/self.D[self.i])
+        self.RHS.data[0,1]=self.RHS.data[0,1]+2*C
+        self.RHS.data[1,0]=self.RHS.data[1,0]-2*C*(1+self.grid.dy*self.s/self.D[self.i])
         return
 
     def step(self):
         'RHS (matrix)x(vector)'
-        self.RHS=bm.BandMat(1,1,self.RHS)
         self.RHS=bm.dot_mv(self.RHS,np.asarray(self.density[:,self.i])[:,0])
         'solve system'
-        self.density[:,self.i+1]=np.asmatrix(linalg.solve_banded((1,1),self.LHS,self.RHS,overwrite_ab=True,overwrite_b=True,check_finite=False)).T
+        self.density[:,self.i+1]=np.asmatrix(linalg.solve_banded((1,1),self.LHS.data,self.RHS,overwrite_ab=True,overwrite_b=True,check_finite=False)).T
         self.i=self.i+1
         
         return
+
+
 
 from scipy.integrate import cumtrapz
 'class to calculate electric field from 2 charge distributions'
