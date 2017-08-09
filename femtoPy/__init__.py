@@ -1,2 +1,2 @@
-__all__ = ['preamble','diff']
+__all__ = ['preamble','diffusion']
 from . import *
