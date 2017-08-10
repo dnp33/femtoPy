@@ -50,7 +50,7 @@ class Distribution:
         self.RHS=self.grid.I.copy()
 
     'set up the second order derivative matrix'
-    def dif_matrix(self):
+    def dif(self):
         self.LHS=self.LHS.__sub__(self.grid.D2.copy()*self.D[self.i+1])
         self.RHS=self.RHS.__add__(self.grid.D2.copy()*self.D[self.i])
         return
@@ -100,22 +100,33 @@ class Distribution:
 
     'Boundary terms'
     def boundary(self):
-        C=self.grid.dt*self.D[self.i]/self.grid.dy/self.grid.dy
-        self.LHS.data[0,1]=self.LHS.data[0,1]-2*C
-        self.LHS.data[1,0]=self.LHS.data[1,0]+2*C*(1+self.grid.dy*self.s/self.D[self.i])
-        self.RHS.data[0,1]=self.RHS.data[0,1]+2*C
-        self.RHS.data[1,0]=self.RHS.data[1,0]-2*C*(1+self.grid.dy*self.s/self.D[self.i])
-        self.LHS.data[1,-1]=2*C
-        self.LHS.data[2,-1]=-C
-        self.RHS.data[1,-1]=-2*C
-        self.RHS.data[2,-1]=C
+        CL=self.grid.dt*self.D[self.i+1]/self.grid.dy/self.grid.dy
+        CR=self.grid.dt*self.D[self.i+1]/self.grid.dy/self.grid.dy
+        self.LHS.data[0,1]=self.LHS.data[0,1]-2*CL
+        self.LHS.data[1,0]=self.LHS.data[1,0]+2*CL*(1+self.grid.dy*self.s/self.D[self.i+1])
+        self.RHS.data[0,1]=self.RHS.data[0,1]+2*CR
+        self.RHS.data[1,0]=self.RHS.data[1,0]-2*CR*(1+self.grid.dy*self.s/self.D[self.i])
+        # 'boundary treated similarily to the other side w/o surface term'
+        # self.LHS.data[1,-1]=2*C
+        # self.LHS.data[2,-1]=-C
+        # self.RHS.data[1,-1]=-2*C
+        # self.RHS.data[2,-1]=C
+        # 'curvature at boundary is equal to curvature just inside boundary'
+        # buf=bm.BandMat(2,1,np.zeros([4,self.grid.y.size]))
+        # buf.data[3,-1]=CL/2.
+        # buf.data[2,-1]=-CL
+        # buf.data[1,-1]=CL/2.
+        # self.LHS=self.LHS.__add__(buf)
+        # self.RHS=self.RHS.__sub__(buf)
+        'NEITHER OF THESE WORKED........'
+        
         return
 
     def step(self):
         'RHS (matrix)x(vector)'
         self.RHS=bm.dot_mv(self.RHS,np.asarray(self.density[:,self.i])[:,0])
         'solve system'
-        self.density[:,self.i+1]=np.asmatrix(linalg.solve_banded((1,1),self.LHS.data,self.RHS,overwrite_ab=True,overwrite_b=True,check_finite=False)).T
+        self.density[:,self.i+1]=np.asmatrix(linalg.solve_banded((self.LHS.l,self.LHS.u),self.LHS.data,self.RHS,overwrite_ab=True,overwrite_b=True,check_finite=False)).T
         self.i=self.i+1
         
         return
