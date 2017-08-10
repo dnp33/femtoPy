@@ -1,2 +1,2 @@
-__all__=['classes','analytic']
+__all__=['distribution','grid','poisson','analytic']
 from . import *
