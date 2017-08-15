@@ -3,6 +3,7 @@
 import numpy as np
 import scipy.linalg as linalg
 import bandmat as bm
+import time as time
 
 
 'class to hold the information for each distribution'
@@ -38,21 +39,42 @@ class Distribution:
             self.density[:,0]=np.zeros(self.grid.y.size)+d0
         elif type(d0) == type(self.density):
             self.density[:,0]=d0
+        elif type(d0) == type(np.linspace(0,10)):
+            self.density[:,0]=np.asmatrix(d0).T
         else: # if function given
-            self.density[:,0]=d0(selg.grid.y,args)
+            self.density[:,0]=d0(self.grid.y,args)
         self.i=0
+
+        'TIME FOR EACH EXECUTION'
+        self.tprep=0
+        self.tdif=0
+        self.tboundary=0
+        self.tefield=0
+        self.tstep=0
+        self.test=0
         
         return
 
     'set up matrices for iteration'
     def prep(self):
+        t0=time.time()
         self.LHS=self.grid.I.copy()
         self.RHS=self.grid.I.copy()
+        x=time.time()-t0
+        self.tprep=self.tprep
+        if x==0:
+            self.test=self.test+1
+        return
 
     'set up the second order derivative matrix'
     def dif(self):
+        t0=time.time()
         self.LHS=self.LHS.__sub__(self.grid.D2.copy()*self.D[self.i+1])
         self.RHS=self.RHS.__add__(self.grid.D2.copy()*self.D[self.i])
+        x=time.time()-t0
+        self.tdif=self.tdif+x
+        if x==0:
+            self.test=self.test+1
         return
 
     'Recombination terms (on diagonal matrix elements)'
@@ -81,6 +103,7 @@ class Distribution:
 
     'Electric field term'
     def eField(self,E):
+        t0=time.time()
         # Turn E-field into banded matrix
         E_new=self.grid.I.copy()
         E_new.data[1,:]=-np.asarray(E.field[:,self.i])[:,0]
@@ -96,22 +119,29 @@ class Distribution:
         self.LHS=self.LHS.__sub__(M2)
         self.RHS=self.RHS.__add__(M1)
         self.RHS=self.RHS.__add__(M2)
+        x=time.time()-t0
+        self.tefield=self.tefield+x
+        if x==0:
+            self.test=self.test+1
         return
 
     'Boundary terms'
-    def boundary(self):
-        CL=self.grid.dt*self.D[self.i+1]/self.grid.dy/self.grid.dy
-        CR=self.grid.dt*self.D[self.i+1]/self.grid.dy/self.grid.dy
-        self.LHS.data[0,1]=self.LHS.data[0,1]-2*CL
-        self.LHS.data[1,0]=self.LHS.data[1,0]+2*CL*(1+self.grid.dy*self.s/self.D[self.i+1])
-        self.RHS.data[0,1]=self.RHS.data[0,1]+2*CR
-        self.RHS.data[1,0]=self.RHS.data[1,0]-2*CR*(1+self.grid.dy*self.s/self.D[self.i])
-        # 'boundary treated similarily to the other side w/o surface term'
+    def boundary(self,E=0):
+        t0=time.time()
+        C=self.grid.dt/self.grid.dy/self.grid.dy
+        CL=C*self.D[self.i+1]
+        CR=C*self.D[self.i]
+        self.LHS.data[0,1]=self.LHS.data[0,1]-CL
+        self.LHS.data[1,0]=self.LHS.data[1,0]+CL*(1+self.grid.dy*self.s/self.D[self.i+1])
+        self.RHS.data[0,1]=self.RHS.data[0,1]+CR
+        self.RHS.data[1,0]=self.RHS.data[1,0]-CR*(1+self.grid.dy*self.s/self.D[self.i])
+        
+        # 'sec. boudnary treated the same as the other side w/o surf. rec. term'
         # self.LHS.data[1,-1]=2*C
         # self.LHS.data[2,-1]=-C
         # self.RHS.data[1,-1]=-2*C
         # self.RHS.data[2,-1]=C
-        # 'curvature at boundary is equal to curvature just inside boundary'
+        # 'curvature at sec. boundary equal to curvature just inside boundary'
         # buf=bm.BandMat(2,1,np.zeros([4,self.grid.y.size]))
         # buf.data[3,-1]=CL/2.
         # buf.data[2,-1]=-CL
@@ -119,15 +149,22 @@ class Distribution:
         # self.LHS=self.LHS.__add__(buf)
         # self.RHS=self.RHS.__sub__(buf)
         'NEITHER OF THESE WORKED........'
-        
+        x=time.time()-t0
+        self.tboundary=self.tboundary+x
+        if x==0:
+            self.test=self.test+1
         return
 
     def step(self):
+        t0=time.time()
         'RHS (matrix)x(vector)'
         self.RHS=bm.dot_mv(self.RHS,np.asarray(self.density[:,self.i])[:,0])
         'solve system'
         self.density[:,self.i+1]=np.asmatrix(linalg.solve_banded((self.LHS.l,self.LHS.u),self.LHS.data,self.RHS,overwrite_ab=True,overwrite_b=True,check_finite=False)).T
         self.i=self.i+1
-        
+        x=time.time()-t0
+        self.tstep=self.tstep+x
+        if x==0:
+            self.test=self.test+1
         return
 
