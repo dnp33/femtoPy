@@ -82,13 +82,12 @@ class Distribution:
         return
     def bi(self):
         dens=np.asarray(self.density[:,self.i])[:,0]
-        dens=dens*dens*self.weight**2
         self.LHS[1,:]=self.LHS[1,:]+self.grid.dt*dens*self.B/2.
         self.RHS[1,:]=self.RHS[1,:]-self.grid.dt*dens*self.B/2.
         return
     def tri(self):
         dens=np.asarray(self.density[:,self.i])[:,0]
-        dens=dens*dens*dens*self.weight**3
+        dens=dens*dens*self.weight**3
         self.LHS[1,:]=self.LHS[1,:]+self.grid.dt*dens*self.C/2.
         self.RHS[1,:]=self.RHS[1,:]-self.grid.dt*dens*self.C/2.
         return
