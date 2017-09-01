@@ -1,5 +1,4 @@
 import numpy as np
-import bandmat as bm
 
 'class to hold the grid parameters for the FDTD code'
 class Grid:
@@ -11,20 +10,20 @@ class Grid:
         self.t = np.asmatrix(np.arange(t_min,t_max+dt,dt)) # t-array for grid
 
         'Derivative stencils for interior points'
-        self.D1=bm.BandMat(1,1,np.zeros((3,self.y.size)))
-        self.D1.data[0,2:]=1
-        self.D1.data[2,:-2]=-1
-        self.D1.data=self.D1.data*self.dt/4./self.dy
+        self.D1=np.zeros((3,self.y.size))
+        self.D1[0,2:]=1
+        self.D1[2,:-2]=-1
+        self.D1=self.D1*self.dt/4./self.dy
         
-        self.D2=bm.BandMat(1,1,np.zeros((3,self.y.size)))
-        self.D2.data[0,2:]=1
-        self.D2.data[1,1:-1]=-2
-        self.D2.data[2,:-2]=1
-        self.D2.data=self.D2.data*self.dt/self.dy**2/2.
+        self.D2=np.zeros((3,self.y.size))
+        self.D2[0,2:]=1
+        self.D2[1,1:-1]=-2
+        self.D2[2,:-2]=1
+        self.D2=self.D2*self.dt/self.dy**2/2.
 
         'Identity matrix'
-        self.I=bm.BandMat(1,1,np.zeros((3,self.y.size)))
-        self.I.data[1,:]=self.I.data[1,:]+1
+        self.I=np.zeros((3,self.y.size))
+        self.I[1,:]=self.I[1,:]+1
         
         return
     
