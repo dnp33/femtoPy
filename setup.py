@@ -9,7 +9,7 @@ setup(
     url='http://github.com/dnp33/femtoPy',
     author='David N. Purschke',
     author_email='purschke@ualberta.ca',
-    packages=['femtoPy','femtoPy/diffusion'],
+    packages=['femtoPy','femtoPy/diffusion','femtoPy/absorption'],
     keywords='femtosecond terahertz thz picosecond diffusion',
     install_requires=['bandmat']
 )
