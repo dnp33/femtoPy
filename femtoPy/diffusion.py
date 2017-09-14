@@ -2,10 +2,11 @@
 import numpy as np
 import scipy.linalg as linalg
 import time as time
+from scipy.special import erfcx
 
 
 'class to hold the information for each distribution'
-class Distribution:
+class dist:
     def __init__(self,grid,weight=1,d0=0,args=[],s=8.5e3,u=0.85,A=1/2.1,B=1./2.1**2,C=1./2.1**3,T=300,D=0,q=-1):
         'grid parameters'
         self.grid=grid
@@ -171,3 +172,55 @@ class Distribution:
             self.test=self.test+1
         return
 
+'class to hold the grid parameters for FDTD simulation'
+class grid:
+    def __init__(self,dt=0.05,dy=0.01,y_min=0,y_max=5,t_min=0,t_max=100):
+        'grid parameters'
+        self.dt = dt # grid size for time
+        self.dy = dy # grid size for space
+        self.y = np.asmatrix(np.arange(y_min,y_max+dy,dy)).T # y-array for grid
+        self.t = np.asmatrix(np.arange(t_min,t_max+dt,dt)) # t-array for grid
+
+        'Derivative stencils for interior points'
+        self.D1=np.zeros((3,self.y.size))
+        self.D1[0,2:]=1
+        self.D1[2,:-2]=-1
+        self.D1=self.D1*self.dt/4./self.dy
+        
+        self.D2=np.zeros((3,self.y.size))
+        self.D2[0,2:]=1
+        self.D2[1,1:-1]=-2
+        self.D2[2,:-2]=1
+        self.D2=self.D2*self.dt/self.dy**2/2.
+
+        'Identity matrix'
+        self.I=np.zeros((3,self.y.size))
+        self.I[1,:]=self.I[1,:]+1
+        
+        return
+
+'analytic expression for density as a function of time with monomolecular rec.'
+def analyticDistribution(x,args):
+    #args[0]= time  args[1]=absorption coefficient  
+    t=args[0]
+    alpha=args[1]
+    mat=args[2]
+    z=mat.D*t
+    
+    x1=alpha*np.sqrt(z)-x/(2*np.sqrt(z))
+    x2=alpha*np.sqrt(z)+x/(2*np.sqrt(z))
+    x3=mat.s*np.sqrt(t/mat.D)+x/2./np.sqrt(z)
+    
+    
+    phi=np.array(0.5*(erfcx(x1)+\
+                      (alpha*mat.D+mat.s)/(alpha*mat.D-mat.s)*erfcx(x2))\
+                 -mat.s*erfcx(x3)/(alpha*mat.D-mat.s))
+    phi[phi==inf]=0
+
+    np.seterr(under='ignore')
+    dat=phi*np.exp(-x*x/(4*z)-t/mat.tau)
+    np.seterr(under='raise')
+    
+    dat[np.where(dat==0)]=np.exp(-alpha*x[np.where(dat==0)])
+    
+    return dat

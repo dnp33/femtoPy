@@ -1,1 +1,1 @@
-FemtoPy relies heavily on numpy and scipy, and also uses the package bandmat to perform operations on banded matrices
+FemtoPy relies heavily on numpy and scipy

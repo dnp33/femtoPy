@@ -1,16 +1,15 @@
 from femtoPy.preamble import *
 from femtoPy import diffusion as diff
-from femtoPy.absorption import saturationModel as sat
+from femtoPy import light
+import time as time
+from multiprocessing import Pool
 
 plt.rcParams['axes.grid']=False
-
-import time as time
-
 
 def update(dist):
     dist.prep()
     dist.dif()
-    dist.mono()
+    dist.bi()
     dist.boundary()
     dist.step()
 
@@ -24,38 +23,63 @@ y_max=20
 t_min=0
 t_max=10
 
+grid=diff.grid(dt=dt,dy=dy,y_min=y_min,y_max=y_max,t_min=t_min,t_max=t_max)
+y=np.asarray(grid.y)[:,0]
+dy=y[1]-y[0]
+t=np.asarray(grid.t.T)[:,0]
+
 'Material Parameters'
-s=.2
-ue=.85
-uh=.04
-T=np.zeros(np.arange(t_min,t_max+dt,dt).size)+300
+s=8.5
+ue=3.88
 e=1.6e-19
-B=1./2100.
-A=1./2.1
+B=.5
+A=1./100.
+alpha0=1.62
+Imax=14
 
-grid=diff.grid.Grid(dt=dt,dy=dy,y_min=y_min,y_max=y_max,t_min=t_min,t_max=t_max)
+'CALCULATE PL SPECTRUM'
 
-alpha=1.62
-Imax=5
+'absorption coefficient and initial spectrum'
+E=np.linspace(1.42,1.55,40)
+Eg=1.42
+alpha=light.sqrtDOS(E,Eg)
+T=0.024
+PL0=light.boltzmannPL(E,alpha,T)
 
-Max=0
+def process(I0):
+    'print step'
+    Time=time.time()-t0
+    minutes=str(int(Time/60))
+    seconds=str(Time%60)[:4]
+    name='I0='+str((I0))+'\ntime='+minutes+' m '+seconds+' s\n'
+    print(name)
 
-N=10
-cmap=iter(plt.cm.rainbow(np.linspace(0,1,N)))
-for I0 in np.linspace(1,10,N,dtype=float):
-    c=next(cmap)
-    y=np.asarray(grid.y)[:,0]
-    t=np.asarray(grid.t.T)[:,0]
-    dSat=sat.absorption(I0,alpha=alpha,Imax=Imax,d=y)
-    dExp=I0*alpha*np.exp(-y*alpha)
+    'calculate initial density'
+    dSat=light.saturation(I0,alpha=alpha0,Imax=Imax,d=y)[1]
 
-    Sat=diff.distribution.Distribution(grid=grid,d0=dSat,s=s,u=ue,A=A,B=B,q=-e,T=T)
-    Exp=diff.distribution.Distribution(grid=grid,d0=dExp,s=s,u=ue,A=A,B=B,q=-e,T=T)
+    'initialize distribution and PL array'
+    Temp=200*np.exp(-t/2.)+300
+    Sat=diff.dist(grid=grid,d0=dSat,s=s,u=ue,A=A,B=B,q=-e,T=Temp)
+    PL=np.zeros((PL0.size,t.size))
+
+    'loop over time steps'
     for i in range(0,grid.t.size-1):
         update(Sat)
-        update(Exp)
+        dens=np.asarray(Sat.density[:,i])[:,0]
+        PL[:,i]=light.PL_reabsorption(alpha,PL0,dens*dens,dy)
+    dens=np.asarray(Sat.density[:,-1])[:,0]
+    PL[:,-1]=light.PL_reabsorption(alpha,PL0,dens*dens,dy)
+    
+    return
 
-    np.savetxt('sat'+str(I0)+'.dat',Sat.density)
-    np.savetxt('exp'+str(I0)+'.dat',Exp.density)
-np.savetxt('y.dat',y)
-np.savetxt('t.dat',t)
+'loop over all intial intensities'
+fluence=np.linspace(1,2,2)
+t0=time.time()
+if __name__ == '__main__':
+    p = Pool(1)
+    p.map(process,fluence)
+    
+    Time=time.time()-t0
+    minutes=Time/60
+    seconds=Time-Time%60
+    print('\ntotal time: ',minutes,' m ',seconds,' s\n')
