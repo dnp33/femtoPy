@@ -11,5 +11,4 @@ setup(
     author_email='purschke@ualberta.ca',
     packages=['femtoPy'],
     keywords='femtosecond terahertz thz picosecond diffusion',
-    install_requires=['bandmat']
 )
