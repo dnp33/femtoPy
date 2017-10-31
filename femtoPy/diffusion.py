@@ -127,6 +127,7 @@ class dist:
         return
 
     'Boundary terms'
+    # CURRENTLY TREATS SECOND BOUNDARY AS ALWAYS 0 
     def boundary(self,E=0):
         t0=time.time()
         C=self.grid.dt/self.grid.dy/self.grid.dy
@@ -163,7 +164,7 @@ class dist:
         nRHS[:-1]=nRHS[:-1]+self.RHS[0,1:]*np.asarray(self.density[1:,self.i])[:,0]
         nRHS[1:]=nRHS[1:]+self.RHS[2,:-1]*np.asarray(self.density[:-1,self.i])[:,0]
 
-        'solve system'
+        'solve matrix equation'
         self.density[:,self.i+1]=np.asmatrix(linalg.solve_banded((1,1),self.LHS,nRHS,overwrite_ab=True,overwrite_b=True,check_finite=False)).T
         self.i=self.i+1
         x=time.time()-t0
@@ -198,6 +199,23 @@ class grid:
         self.I[1,:]=self.I[1,:]+1
         
         return
+
+'Empirical relationship between scattering rate and photoexcited density'
+def Caughey_Thomas(N=np.logspace(14,18,100),N0=1.05e17,tMax=375,tMin=5,alpha=0.22):
+    tau=(tMax-tMin)
+    tau=tau/(1+(N/N0)**alpha)+tMin
+
+    return tau
+
+'Carrier mobility as a function of effective mass, charge, and scattering rate'
+def mobility(mStar=0.067*9.11e-31,tau=3.2e-13,q=1.6e-19):
+    return q*tau/mStar
+
+def diffusion_coefficient(mu=0.85,T=300):
+    return 1.38e-23*T*mu/1.6e-19
+
+def ambipolar_mobility(mu_h=0.04,mu_e=0.85):
+    return mu_h*mu_e/(mu_h+mu_e)
 
 'analytic expression for density as a function of time with monomolecular rec.'
 def analyticDistribution(x,args):
