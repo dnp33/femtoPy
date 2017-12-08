@@ -45,10 +45,6 @@ def figure(figsize=(10,8)):
 
     return fig,ax
 
-def minorTicker(ax):
-    ax.xaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
-    ax.yaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
-
 """
 from imp import find_module
 from imp import load_module

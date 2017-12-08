@@ -1,6 +1,13 @@
-femtoPy/preamble.py
+setup.py
+femtoPy/THz.py
+femtoPy/__init__.py
+femtoPy/absorption.py
+femtoPy/diffusion.py
+femtoPy/imports.py
+femtoPy/poisson.py
 femtoPy.egg-info/PKG-INFO
 femtoPy.egg-info/SOURCES.txt
 femtoPy.egg-info/dependency_links.txt
-femtoPy.egg-info/not-zip-safe
 femtoPy.egg-info/top_level.txt
+test/test.py
+test/test2.py

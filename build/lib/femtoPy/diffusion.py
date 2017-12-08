@@ -7,7 +7,7 @@ from scipy.special import erfcx
 
 'class to hold the information for each distribution'
 class dist:
-    def __init__(self,grid,weight=1,d0=1,s=8.5e3,A=1/2.1,B=1./2.1**2,C=1./2.1**3,D=1,q=-1,T=1):
+    def __init__(self,grid,weight=1,d0=1,s=8.5e3,A=1/2.1,B=1./2.1**2,C=1./2.1**3,D=1,q=-1):
         'grid parameters'
         self.grid=grid
         'transport parameters'
@@ -18,10 +18,6 @@ class dist:
             self.D=D+np.zeros(grid.t.size)
         else:
             self.D=D
-        if type(T) == int or type(T) == float:
-            self.T=T+np.zeros(grid.t.size)
-        else:
-            self.T=T
         'recombination coefficients'
         self.A=A
         self.B=B
@@ -43,17 +39,6 @@ class dist:
         # self.tboundary=0
         # self.tefield=0
         # self.tstep=0
-        
-        return
-    
-    'update diffusion for next step'
-    def update_D(self,N0=1,tMax=375,tMin=5,alpha=0.22):
-        tau_e=Caughey_Thomas(np.amax(self.density[:,self.i]))*10**-15
-        mu=mobility(tau=tau_e)
-        mu_a=ambipolar_mobility(mu_e=mu)
-        D=diffusion_coefficient(mu_a,self.T[self.i])
-        self.D[self.i]=D
-        self.D[self.i+1]=D
         
         return
 
@@ -210,7 +195,7 @@ class grid:
         return
 
 'Empirical relationship between scattering rate and photoexcited density'
-def Caughey_Thomas(N=np.logspace(-4,0,100),N0=1.05,tMax=375,tMin=5,alpha=0.22):
+def Caughey_Thomas(N=np.logspace(14,18,100),N0=1.05e17,tMax=375,tMin=5,alpha=0.22):
     tau=(tMax-tMin)
     tau=tau/(1+(N/N0)**alpha)+tMin
 
@@ -220,11 +205,9 @@ def Caughey_Thomas(N=np.logspace(-4,0,100),N0=1.05,tMax=375,tMin=5,alpha=0.22):
 def mobility(mStar=0.067*9.11e-31,tau=3.2e-13,q=1.6e-19):
     return q*tau/mStar
 
-'calculate diffusion coefficient using mobility and temperature'
 def diffusion_coefficient(mu=0.85,T=300):
     return 1.38e-23*T*mu/1.6e-19
 
-'calculate ambipolar mobility from electron and hole mobility'
 def ambipolar_mobility(mu_h=0.04,mu_e=0.85):
     return mu_h*mu_e/(mu_h+mu_e)
 
