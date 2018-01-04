@@ -167,7 +167,9 @@ class dist:
     def step(self):
         # t0=time.time()
         'RHS (matrix)x(vector)'
-        nRHS=band_times_vec(self.RHS,np.asarray(self.density[:,self.i])[:,0])
+        nRHS=self.RHS[1,:]*np.asarray(self.density[:,self.i])[:,0]
+        nRHS[:-1]=nRHS[:-1]+self.RHS[0,1:]*np.asarray(self.density[1:,self.i])[:,0]
+        nRHS[1:]=nRHS[1:]+self.RHS[2,:-1]*np.asarray(self.density[:-1,self.i])[:,0]
 
         'solve matrix equation'
         self.density[:,self.i+1]=np.asmatrix(linalg.solve_banded((1,1),self.LHS,nRHS,overwrite_ab=True,overwrite_b=True,check_finite=False)).T
@@ -251,13 +253,3 @@ def analyticDistribution(x,args):
     dat[np.where(dat==0)]=np.exp(-alpha*x[np.where(dat==0)])
     
     return dat
-
-def band_times_vec(M,v):
-    return (M[0,:]+M[1,:]+M[2,:])*v
-
-def vec_times_band(v,M):
-    M[0,1:]=M[0,1:]*v[:-1]
-    M[1,:]=M[1,:]*v[:]
-    M[2,:-1]=M[2,:-1]*v[1:]
-
-    return M
