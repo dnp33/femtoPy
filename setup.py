@@ -9,6 +9,6 @@ setup(
     url='http://github.com/dnp33/femtoPy',
     author='David N. Purschke',
     author_email='purschke@ualberta.ca',
-    packages=['femtoPy'],
-    keywords='femtosecond terahertz thz picosecond diffusion',
+    packages=['femtoPy','femtoPy/diffusion'],
+    keywords='femtosecond terahertz picosecond diffusion',
 )
