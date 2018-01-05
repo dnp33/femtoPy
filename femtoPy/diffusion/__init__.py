@@ -1,2 +1,2 @@
-__all__ = ['dist','diff']
+__all__ = ['classes','functions']
 from . import *

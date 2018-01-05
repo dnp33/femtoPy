@@ -3,13 +3,11 @@ import scipy.linalg as linalg
 import time as time  
 from scipy.special import erfcx
 
-'update diffusion for next step'
+'update diffusion coefficient for next step'
 def calc_D(dist,mat):
     tau_e=Caughey_Thomas(N=dist.n(),N0=mat.N0,tMax=mat.tMax,tMin=mat.tMin,alpha=mat.alpha)*10**-15
     mat.mu=mobility(tau=tau_e,mstar=mat.mstar*9.11e-31)
-    #mat.mu=ambipolar_mobility(mu_e=mu)
     mat.D=diffusion_coefficient(mat.mu,dist.T[dist.i])*10
-    #mat.D=mat.D/mat.D*np.amax(mat.D)
     
     return 
 
@@ -53,8 +51,6 @@ def dmu_dx_E(g,mat,E):
     matrix=g.I.copy()
     matrix[1,:]=matrix[1,:]*band_times_vec(g.D1.copy(),mat.mu)*E
     return matrix
-
-
 
 'RHS matrix times density at current time step'
 def calc_RHS(g,matrix,dist):
