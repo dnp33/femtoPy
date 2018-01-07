@@ -7,7 +7,7 @@ class distribution:
         
         'density at t=0'
         if type(d0) == int or type(d0) == float:
-            self.density[:,0]=np.zeros(grid.y.size)+d0
+            self.density[:,0]=np.matrix(np.zeros(grid.y.size)+d0).T
         elif type(d0) == type(self.density):
             self.density[:,0]=d0
         elif type(d0) == type(np.linspace(0,10)):
@@ -36,7 +36,7 @@ class distribution:
 
 'class to hold the information for each distribution'
 class material:
-    def __init__(self,N0=1.05,s=8.5e3,A=1/2.1,B=1./2.1**2,C=1./2.1**3,D=1,q=-1,T=300,tMax=375,tMin=5,alpha=0.22,mu=8.5,mstar=0.067):
+    def __init__(self,N0=1.05,s=8.5e3,A=1/2.1,B=1./2.1**2,C=1./2.1**3,D=1,q=-1,tMax=375,tMin=5,alpha=0.22,mu=8.5,mstar=0.067):
         'transport parameters'
         self.s=s            # surface recombination velocity
         self.q=q            # charge

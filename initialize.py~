@@ -1,0 +1,33 @@
+from femtoPy.imports import *
+import femtoPy.diffusion.classes as classes
+import femtoPy.PL as pl
+
+def initGrid(dt=0.01,dy=0.05,y_min=0,y_max=10,t_min=0,t_max=10):
+    return classes.grid(dt=dt,dy=dy,y_min=y_min,y_max=y_max,t_min=t_min,t_max=t_max)
+
+def initMat(N0=1.05,s=8.5e3,A=1/2.1,B=1./2.1**2,C=1./2.1**3,D=1,
+            q=-1,tMax=375,tMin=5,alpha=0.22,mu=8.5,mstar=0.067):
+    return classes.material(N0=N0,s=s,A=s,B=B,C=C,D=D,q=q,tMax=tMax,tMin=tMin,alpha=alpha,mu=mu,mstar=mstar)
+
+def initDist(grid,d0=0,T=300):
+    if d0!=0:
+        return classes.distribution(grid,d0=d0,T=T)
+    else:
+        d0=np.exp(-grid.depth())
+        return classes.distribution(grid,d0=d0,T=T)
+
+def initPL(grid,dist=0,E=np.linspace(1.35,1.7,100),gamma=0.005,Eg=1.42,
+           theta=1,alpha0=1):
+    return pl.PLspec(grid,E=E,gamma=gamma,Eg=Eg,alpha0=alpha0,theta=theta,dist=dist)
+
+
+'define update function'
+def update(G,dist,mat,PL):
+    f1=RHS_function(G,dist,mat)
+    RHS=diff.calc_RHS(G,f1,dist)
+    dist.density[:,dist.i]=diff.solve(G,f1,RHS)
+    diff.calc_D(e_dens,e_params)
+    f2=RHS_function(G,e_dens,e_params)
+    e_dens.density[:,e_dens.i]=diff.solve(G,f2,RHS)
+    diff.calc_D(dist,mat)
+    PL.calcPL(dist)

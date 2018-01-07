@@ -1,0 +1,7 @@
+import loadClasses as load
+
+G=load.initGrid()
+
+mat=load.initMat()
+
+dist=load.initDist()

@@ -3,14 +3,9 @@ import scipy.linalg as linalg
 import time as time  
 from scipy.special import erfcx
 
-'update diffusion coefficient for next step'
-def calc_D(dist,mat):
-    tau_e=Caughey_Thomas(N=dist.n(),N0=mat.N0,tMax=mat.tMax,tMin=mat.tMin,alpha=mat.alpha)*10**-15
-    mat.mu=mobility(tau=tau_e,mstar=mat.mstar*9.11e-31)
-    mat.D=diffusion_coefficient(mat.mu,dist.T[dist.i])*10
-    
-    return 
-
+#####################
+# EQUATIONS FOR PDE #
+#####################
 'diffusion coefficient terms'
 def D_d2_dx2(g,mat):
     return vec_times_band(mat.D,g.D2.copy())
@@ -52,6 +47,20 @@ def dmu_dx_E(g,mat,E):
     matrix[1,:]=matrix[1,:]*band_times_vec(g.D1.copy(),mat.mu)*E
     return matrix
 
+'Boundary terms'
+def boundary(G,mat,RHS):
+    # t0=time.time()
+    C=G.dt/G.dy/G.dy
+    C=C*mat.D[0]
+    RHS[0,1]=RHS[0,1]+C
+    RHS[1,0]=RHS[1,0]-C*(1+G.dy*mat.s/mat.D[0])
+
+    return RHS
+
+
+###############################
+# LINEAR ALGEBRA FOR SOLUTION #
+###############################
 'RHS matrix times density at current time step'
 def calc_RHS(g,matrix,dist):
     dist.i=dist.i+1
@@ -63,6 +72,21 @@ def solve(g,matrix,vector):
     'solve matrix equation'
     newDens=np.asmatrix(linalg.solve_banded((1,1),LHS,vector,overwrite_ab=True,overwrite_b=False,check_finite=False)).T
     return newDens
+
+
+###############################
+# DIFFUSION COEFFICIENT CALCS #
+###############################
+'update diffusion coefficient for next step'
+def calc_D(dist,mat):
+    tau_e=Caughey_Thomas(N=dist.n(),N0=mat.N0,tMax=mat.tMax,tMin=mat.tMin,alpha=mat.alpha)*10**-15
+    mat.mu=mobility(tau=tau_e,mstar=mat.mstar*9.11e-31)
+    mu_ab=ambipolar_mobility(mu_e=mat.mu)
+    mat.D=diffusion_coefficient(mu_ab,300)#dist.T[dist.i])
+    mat.D=mat.D*10**6
+
+    
+    return 
 
 'Empirical relationship between scattering rate and photoexcited density'
 def Caughey_Thomas(N=np.logspace(-4,0,100),N0=1.05,tMax=375,tMin=5,alpha=0.22):
@@ -83,6 +107,10 @@ def diffusion_coefficient(mu=0.85,T=300):
 def ambipolar_mobility(mu_h=0.04,mu_e=0.85):
     return mu_h*mu_e/(mu_h+mu_e)
 
+
+####################
+# RANDOM FUNCTIONS #
+####################
 'analytic expression for density as a function of time with monomolecular rec.'
 def analyticDistribution(x,args):
     #args[0]= time  args[1]=absorption coefficient  
@@ -109,6 +137,7 @@ def analyticDistribution(x,args):
     
     return dat
 
+'banded matrix operations'
 def band_times_vec(M,v):
     return np.roll(M[0,:]*v,-1)+M[1,:]*v+np.roll(M[2,:]*v,1)
 
@@ -120,13 +149,4 @@ def vec_times_band(v,M):
     return M
 
 
-'Boundary terms'
-# CURRENTLY TREATS SECOND BOUNDARY AS ALWAYS 0 
-def boundary(G,mat,RHS):
-    # t0=time.time()
-    C=G.dt/G.dy/G.dy
-    C=C*mat.D[0]
-    RHS[0,1]=RHS[0,1]+C
-    RHS[1,0]=RHS[1,0]-C*(1+G.dy*mat.s/mat.D[0])
 
-    return RHS

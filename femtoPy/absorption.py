@@ -1,31 +1,5 @@
 import numpy as np
 
-''''' PHOTOLUMINESCENCE '''''
-'calculate PL spectrum with a Boltzmann factor for occupancy'
-# alpha=absorption coefficient as a function of energy (a.u)
-# E=photon energy (a.u)
-# T=temperature (must be same units as E)
-
-def boltzmannPL(E,alpha,T=0.025):
-    PL=alpha*np.exp(-E/T)
-    
-    return PL/np.amax(PL)
-
-'calculate PL spectrum after reabsorption of light leaving a material'
-# PL0=normalized PL spectrum
-# alpha=absorption coefficient for each component of PL0
-# d=grid of positions where PL is calculated
-# N=weight of PL emitted at each d
-# I=PL intensity
-def PL_reabsorption(alpha,PL0,N,dy):
-    I=np.zeros(PL0.size)
-    for i in range(N.size):
-        Inew=-alpha*I+(N[-i]+N[-i-1])*PL0
-        Inew=Inew*dy/2.
-        I=(I+Inew)/(1+alpha*dy/2.)
-
-    return I
-
 ''''' ABSORPTION OF LIGHT '''''
 'saturation model for absorption of light'
 # alpha = absorption coefficient at 0 intensity (a.u)
