@@ -27,7 +27,7 @@ class PLspec:
     def calcPL(self,dist):
         T=dist.T[dist.i]*self.T_eV
         I0=self.CONST*np.exp(-self.E/T)
-        I0=I0/np.amax(I0)
+        I0=I0/np.sum(I0)
         I=np.zeros(I0.size)
         n=dist.n()
         n=n*n

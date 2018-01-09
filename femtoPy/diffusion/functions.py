@@ -10,7 +10,7 @@ from scipy.special import erfcx
 def D_d2_dx2(g,mat):
     return vec_times_band(mat.D,g.D2.copy())
 def constD_d2_dx2(g,mat):
-    return g.D2.copy()*np.amax(mat.D)
+    return g.D2.copy()*mat.D
 def dD_dx_d_dx(g,mat):
     dD_dx=band_times_vec(g.D1.copy(),mat.D)
     return vec_times_band(dD_dx,g.D1.copy())
@@ -57,6 +57,16 @@ def boundary(G,mat,RHS):
 
     return RHS
 
+def constBoundary(G,mat,RHS):
+    # t0=time.time()
+    C=G.dt/G.dy/G.dy
+    C=C*mat.D
+
+    RHS[0,1]=C
+    RHS[1,0]=-C*(1+G.dy*mat.s/mat.D)
+
+    return RHS
+
 
 ###############################
 # LINEAR ALGEBRA FOR SOLUTION #
@@ -68,9 +78,9 @@ def calc_RHS(g,matrix,dist):
 
 'solve linear system'
 def solve(g,matrix,vector):
-    LHS=g.I.copy()-matrix
+    LHS=g.I.copy()-matrix.copy()
     'solve matrix equation'
-    newDens=np.asmatrix(linalg.solve_banded((1,1),LHS,vector,overwrite_ab=True,overwrite_b=False,check_finite=False)).T
+    newDens=np.asmatrix(linalg.solve_banded((1,1),LHS,vector,overwrite_ab=False,overwrite_b=False,check_finite=False)).T
     return newDens
 
 
@@ -82,8 +92,8 @@ def calc_D(dist,mat):
     tau_e=Caughey_Thomas(N=dist.n(),N0=mat.N0,tMax=mat.tMax,tMin=mat.tMin,alpha=mat.alpha)*10**-15
     mat.mu=mobility(tau=tau_e,mstar=mat.mstar*9.11e-31)
     mu_ab=ambipolar_mobility(mu_e=mat.mu)
-    mat.D=diffusion_coefficient(mu_ab,300)#dist.T[dist.i])
-    mat.D=mat.D*10**6
+    mat.D=diffusion_coefficient(mu_ab,dist.T[dist.i])
+    mat.D=mat.D*10**3
 
     
     return 

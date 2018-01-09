@@ -1,6 +1,0 @@
-#import femtoPy.diffusion as diff
-
-G=dist.grid()
-
-print(G.t)
-print(G.y)
