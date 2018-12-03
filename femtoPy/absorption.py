@@ -21,11 +21,11 @@ def saturation(I0, alpha=1, Imax=1, d=np.linspace(0,10,1000)):
         f3 = satModel(I[i-1] + dz * f2 / 2.0,alpha,Imax)
         f4 = satModel(I[i-1] + dz * f3, alpha,Imax)
         dI[i-1] = (f1 + 2.0 * f2 + 2.0 * f3 + f4 ) / 6.0
-        dI[i-1] = dz * dI[i-1]
-        I[i] = I[i-1] + dI[i-1]
+        # dI[i-1] = dz * dI[i-1]
+        I[i] = I[i-1] + dz * dI[i-1]
     I=I[:-1]
 
-    return I,dI
+    return I,dI*dz
 
 ''''' MODELS FOR ABSORPTION COEFFICIENT '''''
 def sqrtDOS(E,Eg=1,alpha0=1):

@@ -1,46 +1,45 @@
-from femtoPy.preamble import *
-from femtoPy import diffusion as diff
+from femtoPy.imports import *
+from initialize import *
+import femtoPy.diffusion.functions as diff
 
-import time as time
+'define update function'
+def update(G,dist,mat,PL):
+    f1=diff.D_d2_dx2(G,mat)-diff.B(G,mat,dist)
+    #f1=diff.constD_d2_dx2(G,mat)
+    #f1=diff.constBoundary(G,mat,f1)
+    f1=diff.boundary(G,mat,f1)
+    RHS=diff.calc_RHS(G,f1,dist)
+    dist.density[:,dist.i]=diff.solve(G,f1,RHS)
+    
+    diff.calc_D(dist,mat)
+    PL.calcPL(dist)
 
+diff.calc_D(dist,mat)
+diff.calc_D(dist2,mat2)
 
-def update(dist  ):
-    dist.prep()
-    dist.dif()
-    dist.boundary()
-    dist.bi()
-    #dist.mono()
-    dist.step()
-
-    return
-
-'Grid Parameters'
-dt=.01
-dy=.05
-y_min=0
-y_max=20
-t_min=0
-t_max=10
-
-'Material Parameters'
-s=0.
-ue=.85
-uh=.04
-T=np.zeros(np.arange(t_min,t_max+dt,dt).size)+300
-e=1.6e-19
-A=1./2.1
-B=1.
+'run simulation'
+MAX_t=G.time().size-1
 
 
-grid=diff.grid.Grid(dt=dt,dy=dy,y_min=y_min,y_max=y_max,t_min=t_min,t_max=t_max)
-e=diff.distribution.Distribution(grid=grid,d0=np.exp(-grid.y*1.62),s=s,u=ue,A=A,q=-e,T=T)
+        
+for i in range(MAX_t):
+    update(G,dist,mat,PL)
+    update(G,dist2,mat2,PL2)
 
-t0=time.time()
-for i in range(0,grid.t.size-1):
-    update(e)
 
-fig,ax=plt.subplots(figsize=(10,8))
-ax.plot(grid.y,e.density[:,-1])
-print(grid.t.size)
+PL.sum()
+PL2.sum()
+
+fig,ax=figure()
+ax.plot(PL.E,PL.spec)
+ax.plot(PL.E,PL2.spec)
+
+fig,ax=figure()
+ax.plot(PL.E,PL2.spec-PL.spec)
+ax.set_xlabel('Energy (eV)')
+ax.set_ylabel(r'$\Delta$PL (a.u)')
+
+ax.axhline(0,linestyle='--',color='k',linewidth=0.5)
+ax.axvline(1.487,color='k',linewidth=0.5)
 
 plt.show()

@@ -71,3 +71,4 @@ def update_1Iter(G,dist,mat,PL):
     e_dens.density[:,e_dens.i]=diff.solve(G,f2,RHS)
     diff.calc_D(dist,mat)
     PL.calcPL(dist)
+

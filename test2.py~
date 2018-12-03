@@ -1,3 +1,0 @@
-from initialize.py import *
-
-print(asdf)

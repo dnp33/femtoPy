@@ -2,7 +2,7 @@
 import numpy as np
 
 class distribution:
-    def __init__(self,grid,d0=0,T=300):
+    def __init__(self,grid,d0=0,T=300,D=1,mu=1):
         self.density=np.matrix(np.empty((grid.depth().size,grid.time().size)))
         
         'density at t=0'
@@ -18,6 +18,9 @@ class distribution:
             self.T=np.zeros(grid.t.size)+T
         else:
             self.T=T
+        'set diffusion coefficient and mobility'
+        self.D=D
+        self.mu=mu
 
         'initialize step number to 0'
         self.i=0
@@ -32,7 +35,6 @@ class distribution:
     def n_z(self,g,z):
         loc=np.amin(np.where(g.depth() >= z))
         return self.density[loc,:]
-                    
 
 'class to hold the information for each distribution'
 class material:

@@ -1,5 +1,0 @@
-import femtoPy.diffusion
-
-G=dist.grid()
-
-print(G)

@@ -14,7 +14,7 @@ class PLspec:
         a_k0=1-np.exp(-self.alpha0)
         self.CONST=E*E*a_k0
         self.dy=grid.dy
-        self.PL=np.empty((E.size,grid.time().size))
+        self.PL=np.zeros((E.size,grid.time().size))
         if dist==0:
             self.PL[:,0]=np.zeros(E.size)
         else:
@@ -26,6 +26,38 @@ class PLspec:
 
     def calcPL(self,dist):
         T=dist.T[dist.i]*self.T_eV
+        I0=self.CONST*np.exp(-self.E/T)
+        I0=I0/np.sum(I0)
+        I=np.zeros(I0.size)
+        n=dist.n()
+        n=n*n
+        for i in range(n.size):
+            Inew=-self.alpha0*I+(n[-i]+n[-i-1])*I0
+            Inew=Inew*self.dy/2.
+            I=(I+Inew)/(1+self.alpha0*self.dy/2.)
+        self.PL[:,self.i]=I
+        self.i=self.i+1
+
+        return
+
+    def calcPL_NoAbsorption(self,dist):
+        T=dist.T[dist.i]*self.T_eV
+        I0=self.CONST*np.exp(-self.E/T)
+        I0=I0/np.sum(I0)
+        I=np.zeros(I0.size)
+        n=dist.n()
+        n=n*n
+        for i in range(n.size):
+            Inew=(n[-i]+n[-i-1])*I0
+            Inew=Inew*self.dy/2.
+            I=(I+Inew)
+        self.PL[:,self.i]=I
+        self.i=self.i+1
+
+        return
+
+    def calcPL_constT(self,dist):
+        T=dist.T*self.T_eV
         I0=self.CONST*np.exp(-self.E/T)
         I0=I0/np.sum(I0)
         I=np.zeros(I0.size)
@@ -68,15 +100,6 @@ def band_tail_alpha(detuning,gamma=0.005,theta=1,alpha0=1):
     
     return alpha
 
-def I_PL(E,alpha,A=1,mu=0,T=0.024,d=1):
-    a_k0=1-np.exp(-alpha*d)
-    I=E*E*a_k0
-    I=I*np.exp(-(E-mu)/T)
-    
-    I=I/np.amax(I)
-    
-    return I*A
-
 ''''' PHOTOLUMINESCENCE '''''
 'calculate PL spectrum with a Boltzmann factor for occupancy'
 # alpha=absorption coefficient as a function of energy (a.u)
@@ -87,6 +110,15 @@ def boltzmannPL(E,alpha,T=0.025):
     PL=alpha*np.exp(-E/T)
     
     return PL/np.amax(PL)
+
+def band_tail_PL(E,alpha,A=1,mu=0,T=0.024,d=1):
+    a_k0=1-np.exp(-alpha*d)
+    I=E*E*a_k0
+    I=I*np.exp(-(E-mu)/T)
+    
+    I=I/np.amax(I)
+    
+    return I*A
 
 'calculate PL spectrum after reabsorption of light leaving a material'
 # PL0=normalized PL spectrum
