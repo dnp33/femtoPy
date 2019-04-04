@@ -49,6 +49,13 @@ def minorTicker(ax):
     ax.xaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
     ax.yaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
 
+def colorAxis(ax,cR='k',cL='C1',cT='C0'):
+    ax.spines['left'].set_color(cL)
+    ax.spines['right'].set_color(cR)
+    ax.tick_params(axis='y',which='both',color=cT,labelcolor=cT)
+    
+    return
+
 """
 from imp import find_module
 from imp import load_module

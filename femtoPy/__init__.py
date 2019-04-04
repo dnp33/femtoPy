@@ -1,2 +1,2 @@
-__all__ = ['imports','diffusion','absorption','poisson','THz','fresnel']
+__all__ = ['imports','diffusion','Optics','THz']
 from . import *
