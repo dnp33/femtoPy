@@ -1,2 +1,2 @@
-__all__ = ['absorption','fresnel','PL','multilayer']
+__all__ = ['Absorption','Fresnel','PL','Multilayer']
 from . import *
