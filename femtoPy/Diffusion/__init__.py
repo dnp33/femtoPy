@@ -1,2 +1,2 @@
-__all__ = ['classes','functions']
+__all__ = ['Classes','Functions','Poisson']
 from . import *
