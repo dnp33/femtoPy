@@ -1,1 +1,0 @@
-FemtoPy relies heavily on numpy and scipy
