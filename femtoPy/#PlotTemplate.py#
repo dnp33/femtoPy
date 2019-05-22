@@ -7,7 +7,6 @@ def fig(sx=10,sy=7,nMinor=2):
     return fig,ax
 
 def fig1(func,sx=10,sy=7,*args):
-    print(func)
     fig,ax=plt.subplots(figsize=(sx,sy) )
     minorTicker(ax)
     func(fig,ax,args)
