@@ -1,5 +1,5 @@
 import numpy as np
-import femtoPy.PlotTemplate as ptemp
+import femtoPy.Templates as Template
 import matplotlib as matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.ticker as FEMTOTICKER
