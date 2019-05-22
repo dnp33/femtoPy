@@ -55,7 +55,7 @@ class waveform:
             loc_tmax=self.t.size
         self.t[:loc_tmax-loc_tmin]=self.t[loc_tmin:loc_tmax]
         self.t.resize(loc_tmax-loc_tmin,refcheck=False)
-        self.wf=self.wf[loc_tmin:loc_tmax]
+        self.wf=self.wf[loc_tmin:loc_tmax+1]
         self.FFT()
         return
     
