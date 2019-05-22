@@ -39,13 +39,6 @@ plt.rcParams['legend.fontsize']=20
 plt.rcParams['legend.fancybox']=True
 plt.rcParams['legend.scatterpoints']=1
 
-def figure(figsize=(10,7)):
-    fig,ax=plt.subplots(figsize=figsize)
-    ax.xaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
-    ax.yaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
-
-    return fig,ax
-
 def minorTicker(ax):
     ax.xaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
     ax.yaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
