@@ -13,19 +13,19 @@ def fig1(func,sx=10,sy=7,*args):
 
     return fig,ax
 
-def wf1(fig,ax,labX='Time (ps)',labY='Electric Field (kV/cm)'):
+def wf1(fig,ax,*args,labX='Time (ps)',labY='Electric Field (kV/cm)'):
     ax.set_xlabel(labX)
     ax.set_ylabel(labY)
 
     return
 
-def wf2(fig,ax,labX='Time (ps)',labY='Electric Field (a.u)'):
+def wf2(fig,ax,*args,labX='Time (ps)',labY='Electric Field (a.u)'):
     ax.set_xlabel(labX)
     ax.set_ylabel(labY)
 
     return
 
-def spec(fig,ax,labX='Frequency (THz)',labY='Amp. (a.u)'):
+def spec(fig,ax,*args,labX='Frequency (THz)',labY='Amp. (a.u)'):
     ax.set_xlabel(labX)
     ax.set_ylabel(labY)
     ax.set_yscale('log')

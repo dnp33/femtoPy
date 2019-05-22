@@ -10,11 +10,11 @@ from scipy.signal import hilbert as sgn_hilbert
 class waveform:
     def __init__(self,folder='',filename=False,t_col=0,wf_col=1,
                  peak_field=False,tmin=False,tmax=False,tShift=0,
-                 fmin=False,fmax=False,t=False,wf=False,dat=False):
+                 fmin=False,fmax=False,t=False,wf=False,dat=False,sens=200):
         # find data from file
         if filename:
             self.dat=np_loadtxt(folder+'/'+filename)
-            self.t=-self.dat[:,t_col]+tShift; self.wf=self.dat[:,wf_col]
+            self.t=-self.dat[:,t_col]+tShift; self.wf=self.dat[:,wf_col]/10*sens
             self.trimTime(tmin,tmax); self.FFT(); self.trimFreq(fmin,fmax)
         # send t & wf data
         if type(wf) != bool:
