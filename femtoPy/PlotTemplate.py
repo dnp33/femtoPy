@@ -1,14 +1,14 @@
 import matplotlib.pyplot as plt
 
-def fig1(sx=10,sy=7):
+def fig(sx=10,sy=7):
     fig,ax=plt.subplots(figsize=figsize)
     ax.xaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
     ax.yaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
 
     return fig,ax
 
-def fig2(func,sx=10,sy=7,*args):
-    fig,ax=plt.subplots(figsize=figsize)
+def fig1(func,sx=10,sy=7,*args):
+    fig,ax=plt.subplots(figsize=(sx,sy))
     ax.xaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
     ax.yaxis.set_minor_locator(FEMTOTICKER.AutoMinorLocator(2))
 
