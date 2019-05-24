@@ -9,7 +9,7 @@ from scipy.signal import hilbert as sgn_hilbert
 
 # class to hold waveform data
 class waveform:
-    def __init__(self ,folder='.',filename=False,t_col=0,wf_col=1,
+    def __init__(self,folder='.',filename=False,t_col=0,wf_col=1,
                  peak_field=False,tmin=False,tmax=False,tShift=0,
                  fmin=False,fmax=False,t=False,wf=False,dat=False,sens=200,invertTime=False):
         # find data from file
