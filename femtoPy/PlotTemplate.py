@@ -2,13 +2,13 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator as plt_aml
 
 def fig(sx=10,sy=7,nMinor=2):
-    fig,ax=plt.subplots(figsize=figsize)
+    fig,ax=plt.subplots(figsize=(sx,sy))
     minorTicker(ax,nMinor=nMinor)
     return fig,ax
 
-def fig1(func,sx=10,sy=7,*args):
+def fig1(func,sx=10,sy=7,nMinor=2,*args):
     fig,ax=plt.subplots(figsize=(sx,sy) )
-    minorTicker(ax)
+    minorTicker(ax,nMinor=nMinor)
     func(fig,ax,args)
 
     return fig,ax

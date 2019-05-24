@@ -1,2 +1,2 @@
-__all__ = ['Header','Diffusion','Optics','THz','Bloch']
+__all__ = ['Diffusion','Optics','THz','Bloch']
 from . import *

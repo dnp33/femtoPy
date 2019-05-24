@@ -1,2 +1,2 @@
-__all__ = ['TDS','funcs']
+__all__ = []
 from . import *

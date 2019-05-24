@@ -1,5 +1,5 @@
 from numpy import sqrt; from numpy import loadtxt
-from waveform import waveform
+from femtoPy.THz.waveform import waveform
 from copy import deepcopy
 from importlib import reload
 
