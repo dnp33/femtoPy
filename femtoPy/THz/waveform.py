@@ -2,19 +2,20 @@ from numpy import loadtxt as np_loadtxt; from numpy import amax as np_amax
 from numpy import amin as np_amin; from numpy import where as np_where
 from numpy import zeros as np_zeros; from numpy import absolute as np_absolute
 from numpy import angle as np_angle; from numpy import unwrap as np_unwrap
+from numpy import flipud as np_flipud
 from numpy.fft import rfft as fft_rfft
 from numpy.fft import rfftfreq as fft_rfftfreq
 from scipy.signal import hilbert as sgn_hilbert
 
 # class to hold waveform data
 class waveform:
-    def __init__(self,folder='',filename=False,t_col=0,wf_col=1,
+    def __init__(self,folder='.',filename=False,t_col=0,wf_col=1,
                  peak_field=False,tmin=False,tmax=False,tShift=0,
                  fmin=False,fmax=False,t=False,wf=False,dat=False,sens=200):
         # find data from file
         if filename:
             self.dat=np_loadtxt(folder+'/'+filename)
-            self.t=-self.dat[:,t_col]+tShift; self.wf=self.dat[:,wf_col]/10*sens
+            self.t=self.dat[:,t_col]+tShift; self.wf=np_flipud(self.dat[:,wf_col])/10*sens
             self.trimTime(tmin,tmax); self.FFT(); self.trimFreq(fmin,fmax)
         # send t & wf data
         if type(wf) != bool:
