@@ -1,7 +1,6 @@
 from numpy import pi as np_pi; from numpy import conjugate as np_conj
 from numpy import where as np_where
 
-# free space permittivity (SI units)
 epsilon0=8.85e-12
 # basic thin film formula
 # INPUTS
