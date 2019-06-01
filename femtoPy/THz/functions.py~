@@ -45,7 +45,7 @@ def Lorentz(f,epsInf=1,epsSt=1.1,f0=1.5,gamma=0.1):
 # f=frequency
 # sigma=complex conductivity
 def sig_to_eps(f,sigma):
-    sigma=np_conj(sigma[np_where(f != 0)])
+    sigma=np_conjugate(sigma[np_where(f != 0)])
     f=f[np_where(f !=0)]
     w=2*np_pi*f*1e12
     return f,1+1j*sigma/(w*epsilon0)
