@@ -1,5 +1,5 @@
 import numpy as np
-import femtoPy.PlotTemplate as ptemp
+import femtoPy.PlotTemplate as pt
 import matplotlib as matplotlib
 import matplotlib.pyplot as plt
 
