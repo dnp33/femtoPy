@@ -26,9 +26,10 @@ def thinFilm_mod(t,n=2,d=1,sigma=0):
 # f=frequency
 # DC=DC conductivity
 # tau=scattering time
+# uses convention that sigma_imag is positive
 def Drude(f,DC=17500,tau=0.18):
     w=2*np_pi*f
-    return DC/(1+1j*w*tau)
+    return DC/(1-1j*w*tau)
 
 # calculate dielectric function from Lorentz model
 # INPUTS
