@@ -1,8 +1,8 @@
 from numpy import pi as np_pi; from numpy import conjugate as np_conj
 from numpy import where as np_where
+from femtoPy.Constants import eps0
+from femtoPy.Constants import imp0
 
-# free space permittivity (SI units)
-epsilon0=8.85e-12
 # basic thin film formula
 # INPUTS
 # n=substrate index (can be imaginary/dispersive)
@@ -11,14 +11,14 @@ epsilon0=8.85e-12
 # returns conductivity (in Siemann's/unit(d)
 def thinFilm(t,n=2,d=1):
     sigma=(n+1)*(1/t-1)
-    return sigma/377/d
+    return np_conj(sigma/imp0/d)
 
 # modified thin film formula
 # INPUTS
 # "" "" 
 # sigma=bare conductivity of film
 def thinFilm_mod(t,n=2,d=1,sigma=0):
-    nEff=n+sigma*d*377
+    nEff=n+sigma*d*imp0
     return thinFilm(t,nEff,d)
 
 # calculate conductivity from Drude model
@@ -49,14 +49,14 @@ def sig_to_eps(f,sigma):
     sigma=np_conj(sigma[np_where(f != 0)])
     f=f[np_where(f !=0)]
     w=2*np_pi*f*1e12
-    return f,1+1j*sigma/(w*epsilon0)
+    return f,1+1j*sigma/(w*eps0)
 
 # calculate conductivity from dielectric function
 # INPUTS
 # f=frequency
 # eps=complex dielectric function
 def eps_to_sig(f,eps):
-    return -1j*(eps-1)*epsilon0*f*2*np_pi*1e12
+    return -1j*(eps-1)*eps0*f*2*np_pi*1e12
 
 # calculate conductivity from Drude model
 # INPUTS
