@@ -70,3 +70,23 @@ def DrudeSmith(f,tau,sigmaDC,c):
     w=2*np_pi*f
     const=1-1j*w*tau
     return sigmaDC*(1+c/const)/const
+
+# make an FFT figure w/ amplitude & phase
+def fftFig(figsize=(10,8),left=.13,right=.87,mid=.7,top=.9,bottom=.13,hspace=0):
+    fig=plt.figure(figsize=figsize)
+    'make amplitude figure'
+    gs2=gridspec.GridSpec(1,1)
+    gs2.update(left=left,right=right,top=mid,bottom=bottom,hspace=0)
+    axA=plt.subplot(gs2[0,0])
+    axA.set_xlabel('frequency (THz)')
+    axA.set_ylabel('amplitude (a.u)')
+
+    'make phase figure'
+    gs1=gridspec.GridSpec(1,1)
+    gs1.update(left=left,right=right,top=top,bottom=mid)
+    axP=plt.subplot(gs1[0,0])
+    axP.set_ylabel('phase\n(a.u)')
+    # axP.set_xticks([])
+    # axP.set_yticks([])
+
+    return fig,axA,axP
