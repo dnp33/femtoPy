@@ -11,14 +11,14 @@ def wf1(sx=10,sy=7,nMinor=2,xlabel='Time (ps)',ylabel='Electric Field (kV/cm)'):
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    return
+    return fig,ax
 
 def wf2(sx=10,sy=7,nMinor=2,xlabel='Time (ps)',ylabel='Electric Field (a.u)'):
     fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    return
+    return fig,ax
 
 def spec(xlabel='THz',sx=10,sy=7,nMinor=2,ylabel='Amp. (a.u)'):
     fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
@@ -49,9 +49,10 @@ def AC(sx=10,sy=7,nMinor=2,ylabel='a.u',xlabel='fs'):
     ax.set_xlabel('time ('+xlabel+')')
     return fig,ax
 
-def minorTicker(ax,nMinor=2):
-    ax.xaxis.set_minor_locator(plt_aml(nMinor))
-    ax.yaxis.set_minor_locator(plt_aml(nMinor))
+def minorTicker(ax,nMinor=1):
+    for i in range(len(ax)):
+        ax.xaxis.set_minor_locator(plt_aml(nMinor+1))
+        ax.yaxis.set_minor_locator(plt_aml(nMinor+1))
 
     return 
 
