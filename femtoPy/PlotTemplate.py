@@ -1,26 +1,27 @@
 from matplotlib.pyplot import subplots as mpl_subplots
 from matplotlib.ticker import AutoMinorLocator as plt_aml
+from numpy import array as np_array
 
-def figure(sx=10,sy=7,nMinor=2):
+def figure(sx=10,sy=7,nMinor=1):
     fig,ax=mpl_subplots(figsize=(sx,sy))
     minorTicker(ax,nMinor=nMinor)
     return fig,ax
 
-def wf1(sx=10,sy=7,nMinor=2,xlabel='Time (ps)',ylabel='Electric Field (kV/cm)'):
+def wf1(sx=10,sy=7,nMinor=1,xlabel='Time (ps)',ylabel='Electric Field (kV/cm)'):
     fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
     return fig,ax
 
-def wf2(sx=10,sy=7,nMinor=2,xlabel='Time (ps)',ylabel='Electric Field (a.u)'):
+def wf2(sx=10,sy=7,nMinor=1,xlabel='Time (ps)',ylabel='Electric Field (a.u)'):
     fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
     return fig,ax
 
-def spec(xlabel='THz',sx=10,sy=7,nMinor=2,ylabel='Amp. (a.u)'):
+def spec(xlabel='THz',sx=10,sy=7,nMinor=1,ylabel='Amp. (a.u)'):
     fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
     ax.set_ylabel(ylabel)
     if xlabel=='THz':
@@ -37,20 +38,24 @@ def spec(xlabel='THz',sx=10,sy=7,nMinor=2,ylabel='Amp. (a.u)'):
         ax.set_xlabel(xlabel)
     return fig,ax
 
-def PD(sx=10,sy=7,nMinor=2,ylabel='mV',xlabel='ns'):
+def PD(sx=10,sy=7,nMinor=1,ylabel='mV',xlabel='ns'):
     fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
     ax.set_ylabel('PD Trace ('+ylabel+')')
     ax.set_xlabel('time ('+xlabel+')')
     return fig,ax
 
-def AC(sx=10,sy=7,nMinor=2,ylabel='a.u',xlabel='fs'):
+def AC(sx=10,sy=7,nMinor=1,ylabel='a.u',xlabel='fs'):
     fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
     ax.set_ylabel('AC Trace ('+ylabel+')')
     ax.set_xlabel('time ('+xlabel+')')
     return fig,ax
 
 def minorTicker(ax,nMinor=1):
-    for i in range(len(ax)):
+    if type(ax)==type(np_array([])):
+        for i in range(len(ax)):
+            ax[i].xaxis.set_minor_locator(plt_aml(nMinor+1))
+            ax[i].yaxis.set_minor_locator(plt_aml(nMinor+1))
+    else:
         ax.xaxis.set_minor_locator(plt_aml(nMinor+1))
         ax.yaxis.set_minor_locator(plt_aml(nMinor+1))
 
