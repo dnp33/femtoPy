@@ -13,6 +13,7 @@ class TRTS:
     def __init__(self,label='data',folder='.',filename=False,Col1=1,Col2=3,
                  sens1=1000,sens2=5,tmin=False,tmax=False,tshift=False,
                  fmin=False,fmax=False,t=False,ref=False,samp=False):
+        """test doc_string"""
         if filename:
             self.sens1=sens1; self.sens2=sens2; self.label=label;
             self.Col1=Col1; self.Col2=Col2
