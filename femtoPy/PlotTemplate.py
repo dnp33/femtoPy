@@ -51,7 +51,8 @@ def AC(sx=10,sy=7,nMinor=1,ylabel='a.u',xlabel='fs'):
     return fig,ax
 
 def minorTicker(ax,nMinor=1):
-    if type(ax)==type(np_array([])):
+    axType=type(ax)
+    if axType==type(np_array([])) or axType==type([]):
         for i in range(len(ax)):
             ax[i].xaxis.set_minor_locator(plt_aml(nMinor+1))
             ax[i].yaxis.set_minor_locator(plt_aml(nMinor+1))

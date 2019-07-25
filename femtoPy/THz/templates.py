@@ -36,7 +36,7 @@ def wf(cls,filename='',invertTime=False,wfCol=1,tCol=0):
     ----------
     cls : waveform object that will hold the data
     filename : name of waveform file
-    invertTime : switch direction of time (necessary for some filetypes)
+    invertTime : switch direction of time (necessary for some file types)
     wfCol : column that holds waveform data
     tCol : column that holds time data
     """
@@ -49,6 +49,22 @@ def wf(cls,filename='',invertTime=False,wfCol=1,tCol=0):
 
 def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
            nMin=1,nAvg=2,invertTime=False ):
+    """
+    this function loads a set of reference & sample waveforms into waveform
+    objects that are stored in cls, a spectroscopy1d object
+
+    Parameters
+    ----------
+    refFile : root filename for reference wf
+    sampeFile : " " sample wf
+    tCol : time column in wf files
+    wfCol : waveform data column in wf files
+    sensRef : ref lock-in sensitivity
+    sensSamp : sample " "
+    nMin : minimum index of average (probably 0 or 1)
+    nAvg : total number of averages
+    invertTime : switch direction of time (necessary for some file types)
+    """
     dat=np_loadtxt(refFile+str(nMin))
     cls.ref.t=cls.samp.t=dat[:,tCol]
     cls.ref.nAvg=nAvg; cls.samp.nAvg=nAvg
@@ -65,9 +81,22 @@ def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
         
     return
     
-
 def TDS(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
          invertTime=False):
+    """
+    this function loads a reference & sample waveform into a waveform
+    objects that are stored in cls, a spectroscopy1d object
+
+    Parameters
+    ----------
+    refFile : root filename for reference wf
+    sampeFile : " " sample wf
+    tCol : time column in wf files (usually 0)
+    wfCol : waveform data column in wf files (usually 1)
+    sensRef : ref lock-in sensitivity
+    sensSamp : sample " "
+    invertTime : switch direction of time (necessary for some file types)
+    """
     ref=np_loadtxt(refFile)
     samp=np_loadtxt(sampFile)
     cls.ref.t=cls.samp.t=ref[:,tCol]
@@ -75,7 +104,6 @@ def TDS(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
     cls.samp.wf=samp[:,wfCol]*sensSamp
 
     return
-
 
 def syntheticWaveform(cls,t=np_linspace(-10,10,200),tau=1,t0=0,f0=1,E0=1):
     """

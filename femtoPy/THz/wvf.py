@@ -20,8 +20,8 @@ class waveform:
     **Incomplete section**
     
     """
-    def __init__(self,loadFunc=None,peak_field=None,sens=None,tmin=None,tmax=None,
-                 tShift=0,fmin=None,fmax=None,**kwargs):
+    def __init__(self,loadFunc=None,peak_field=None,sens=None,tmin=None,
+                 tmax=None,tShift=0,fmin=None,fmax=None,**kwargs):
         """
         this __init__ method initializes a waveform object with either a set of
         waveforms from an average or a single waveform. It calculates the 
@@ -120,19 +120,26 @@ class waveform:
         return
     
     # trim time & waveform array to desired window, calc transform
-    def trimTime(self,tmin=False,tmax=False):
+    def trimTime(self,tmin=False,tmax=False,err=True):
         """trims time windows, discards old time window"""
         if tmin:
             loc=np_where(self.t > tmin)
             self.t=self.t[loc]
             self.wf=self.wf[loc]
             if self.nAvg >1: self.wfs=self.wfs[loc,:]
+            try: self.wfErr
+            except: pass
+            else: self.wfErr=self.wfErr[loc]
         if tmax:
             loc=np_where(self.t < tmax)
             self.t=self.t[loc]
             self.wf=self.wf[loc]
             if self.nAvg > 1: self.wfs=self.wfs[loc]
-        self.FFT()
+            try: self.wfErr
+            except: pass
+            else: self.wfErr=self.wfErr[loc]
+                                        
+        self.FFT(err=err)
 
         return
 
@@ -155,12 +162,20 @@ class waveform:
         """returns fft amplitude"""
         return np_absolute(self.fft)
     @property
+    def amps(self):
+        """returns amplitudes of each measurement in average"""
+        return np_absolute(self.ffts)
+    @property
     def ampErr(self):
         """returns error in fft amplitude"""
         return np_absolute(self.fftErr)
     @property
     def phase(self):
         """returns fft phase"""
+        return np_unwrap(np_angle(self.fft))
+    @property
+    def phases(self):
+        """returns phase of each measurement in the average"""
         return np_unwrap(np_angle(self.fft))
     @property
     def ampTrim(self):
@@ -252,6 +267,11 @@ class spectroscopy1D:
         self.samp.trimTime(tmin=tmin,tmax=tmax)
 
         self.trans=self.samp.fft/self.ref.fft
+        try: self.samp.fftErr
+        except: pass
+        else:
+            self.transErr=self.trans*np_sqrt((self.ref.ampErr/self.ref.amp)**2
+                          +(self.samp.ampErr/self.samp.amp)**2)
 
         return
 
