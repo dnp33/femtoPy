@@ -228,6 +228,22 @@ def voltage(fig=None,ax=None,sx=10,sy=7,nMinor=1,yunits='mV',xunits='ns'):
     ax.set_xlabel('time ('+xlabel+')')
     return fig,ax
 
+def Raman(fig=None,ax=None,sx=10,sy=7,nMinor=1,ylabel='Raman intensity (a.u)',
+       xlabel=r'wavenumber (cm$^{-1}$)'):
+    """
+    Raman spectroscopy graph
+
+    Parameters
+    ----------
+    fig,ax : default to None (makes a figure)
+    xlabel (ylabel) : default wavenumber (cm^-1) & Raman intensity (a.u)
+    """
+    if type(fig)==type(None):
+        fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel)
+    return fig,ax
+
 def AC(fig=None,ax=None,sx=10,sy=7,nMinor=1,ylabel='AC trace (a.u)',
        xlabel='time (fs)'):
     """
