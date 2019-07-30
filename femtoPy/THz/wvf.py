@@ -1,9 +1,13 @@
 from numpy import amax as np_amax, amin as np_amin, where as np_where,\
     zeros as np_zeros, absolute as np_absolute, angle as np_angle,\
-    unwrap as np_unwrap, flipud as np_flipud, sqrt as np_sqrt,\
-    mean as np_mean, std as np_std
+    unwrap as np_unwrap, flipud as np_flipud, sqrt as np_sqrt, \
+    mean as np_mean, std as np_std, real as np_real, imag as np_imag,\
+    append as np_append, pi as np_pi
 from numpy.fft import rfft as fft_rfft, rfftfreq as fft_rfftfreq
 from scipy.signal import hilbert as sgn_hilbert
+from femtoPy.THz.functions import eps_to_sig as fnc_eps_to_sig,\
+    sig_to_eps as fnc_sig_to_eps
+from femtoPy.Constants import c 
 
 # class to hold waveform data
 class waveform:
@@ -21,7 +25,8 @@ class waveform:
     
     """
     def __init__(self,loadFunc=None,peak_field=None,sens=None,tmin=None,
-                 tmax=None,tShift=0,fmin=None,fmax=None,**kwargs):
+                 tmax=None,tShift=0,fmin=None,fmax=None,calc=True,
+                 **kwargs):
         """
         this __init__ method initializes a waveform object with either a set of
         waveforms from an average or a single waveform. It calculates the 
@@ -42,18 +47,17 @@ class waveform:
         tmin/tmax : min/max time to keep
         fmin/fmax : range of frequencies with good signal/noise
         tShift : time shift
+        calc : calculate FFT/wf etc. automatically (default True)
+        
         **kwargs : refer to loadFunc
         """
-        try: kwargs['nAvg']
-        except: self.nAvg=1
-        else: self.nAvg=kwargs['nAvg']
+        self.calc=calc; self.avg=False
+        
         if type(loadFunc) != type(None):
             loadFunc(self,**kwargs)
-            self.calcWfAvg()
-            self.shiftTime(tShift)
-            if peak_field: self.scale(peak_field,recalc=False)
-            elif sens: self.scale(sens/10,recalc=False)
-            else: self.scale(1,recalc=False)
+            if peak_field: self.scale(peak_field)
+            elif sens: self.scale(sens/10)
+            else: self.scale(1)
             self.trimTime(tmin=tmin,tmax=tmax)
         
         return
@@ -67,34 +71,30 @@ class waveform:
 
         return
         
-    def calcWfAvg(self,err=True):
+    def calcWfAvg(self):
         """calculate average of all wfs"""
         self.wf=np_mean(self.wfs,axis=1)
-        if err:
-            self.wfErr=np_std(self.wfs,axis=1,ddof=1)/np_sqrt(self.nAvg)
+        self.wfErr=np_std(self.wfs,axis=1,ddof=1)/np_sqrt(self.wfs[0,:].size)
         return
     
-    def calcFFTavg(self,err=True):
+    def calcFFTavg(self):
         """calculate average of all FFTs"""
         self.fft=np_mean(self.ffts,axis=1)
-        if err:
-            self.fftErr=np_std(self.ffts,axis=1,ddof=1)/np_sqrt(self.nAvg)
+        self.fftErr=np_std(self.ffts,axis=1,ddof=1)/np_sqrt(self.wfs[0,:].size)
         return
         
-    def scale(self,scale,err=True,recalc=True):
+    def scale(self,scale):
         """
         scales waveform and wf avgs by scale
         """
         scale=scale/np_amax(np_absolute(self.wf))
-        
-        try: self.wfs
-        except: self.wf=scale*self.wf
-        else:
+        if self.avg:
             self.wfs=self.wfs*scale
-            self.calcWfAvg(err=err)
+            self.calcWfAvg()
+        else:
+            self.wf=scale*self.wf
         
-        if recalc:
-            self.FFT()
+        if self.calc: self.FFT()
 
         return
 
@@ -108,38 +108,36 @@ class waveform:
         return
     
     # transform
-    def FFT(self,err=True):
+    def FFT(self):
         """calculate FFT"""
         self.f=fft_rfftfreq(self.t.size,self.t[1]-self.t[0])
-        if self.nAvg > 1:
+        if self.avg:
             self.ffts=fft_rfft(self.wfs,axis=0)
-            self.calcFFTavg(err=err)
+            self.calcFFTavg()
         else:
             self.fft=fft_rfft(self.wf)
 
         return
-    
+
     # trim time & waveform array to desired window, calc transform
-    def trimTime(self,tmin=False,tmax=False,err=True):
+    def trimTime(self,tmin=False,tmax=False):
         """trims time windows, discards old time window"""
         if tmin:
             loc=np_where(self.t > tmin)
             self.t=self.t[loc]
             self.wf=self.wf[loc]
-            if self.nAvg >1: self.wfs=self.wfs[loc,:]
-            try: self.wfErr
-            except: pass
-            else: self.wfErr=self.wfErr[loc]
+            if self.avg:
+                self.wfs=self.wfs[loc,:]
+                self.wfErr=self.wfErr[loc]
         if tmax:
             loc=np_where(self.t < tmax)
             self.t=self.t[loc]
             self.wf=self.wf[loc]
-            if self.nAvg > 1: self.wfs=self.wfs[loc]
-            try: self.wfErr
-            except: pass
-            else: self.wfErr=self.wfErr[loc]
+            if self.avg:
+                self.wfs=self.wfs[loc]
+                self.wfErr=self.wfErr[loc]
                                         
-        self.FFT(err=err)
+        if self.calc: self.FFT()
 
         return
 
@@ -156,7 +154,30 @@ class waveform:
             self.fftTrim=self.fftTrim[loc]
 
         return
-    
+    @property
+    def t(self):
+        return self._t
+    @t.setter
+    def t(self,t):
+        self._t=t
+    @property
+    def wf(self):
+        return self._wf
+    @wf.setter
+    def wf(self,wf):
+        self._wf=wf
+        if self.calc: self.FFT()
+        return
+    @property
+    def wfs(self):
+        return self._wfs
+    @wfs.setter
+    def wfs(self,wfs):
+        self._wfs=wfs
+        self.avg=True
+        if self.calc:
+            self.calcWfAvg()
+            self.FFT()
     @property
     def amp(self):
         """returns fft amplitude"""
@@ -194,7 +215,7 @@ class waveform:
         """returns time domain envelope phase"""
         return np_unwrap(np_angle(self.envelope))
     @property
-    def loct_max(self,peak='absolute'):
+    def tWfMax(self,peak='absolute'):
         """
         returns the location (in time) of the positive/negative/absolute peak
         """
@@ -209,7 +230,7 @@ class waveform:
             print('invalid choice for locMax')
             return
     @property
-    def locf_max(self):
+    def fAmpMax(self):
         """returns the peak frequency"""
         AMP=self.amp
         return f[np_amin(np_where(AMP==np_amax(AMP)))]
@@ -241,14 +262,9 @@ class spectroscopy1D:
         tmin/tmax,fmin/fmax,tShift : see wvf.waveform
         **kwargs : refer to loadFunc
         """
-        try: kwargs['nAvg']
-        except: self.nAvg=1
-        else: self.nAvg=kwargs['nAvg']
         self.ref=waveform(); self.samp=waveform()
         
         loadFunc(self,**kwargs)
-        self.ref.calcWfAvg()
-        self.samp.calcWfAvg()
         self.shiftTime(tShift)
         self.trimTime(tmin=tmin,tmax=tmax)
         self.trimFreq(fmin=fmin,fmax=fmax)
@@ -296,3 +312,71 @@ class spectroscopy1D:
     def fTrim(self):
         """trimmed frequency vector"""
         return self.ref.fTrim
+    @property
+    def sigma(self):
+        """complex conductivity"""
+        return self._sigma
+    @sigma.setter
+    def sigma(self,sigma):
+        """
+        set complex conductivity & calc epsilon/n
+        
+        Notes
+        -----
+        sets epsilon(0) & n(0) to 1 because of the diverging f^-1 term
+        """
+        self._sigma=sigma
+        f,self._eps=fnc_sig_to_eps(self.f,sigma)
+        if self._eps.size < self.f.size:
+            self._eps=np_append(1,self._eps)
+        self.n=np_sqrt(self._eps)
+        return
+    @property
+    def sigmaR(self):
+        """real part of conductivity"""
+        return np_real(self._sigma)
+    @property
+    def sigmaI(self):
+        """imaginary part of conductivity"""
+        return np_imag(self._sigma)
+    @property
+    def eps(self):
+        """complex dielectric function"""
+        return self._eps
+    @eps.setter
+    def eps(self,eps):
+        """set dielectric function & calculate conductivity/index"""
+        self._eps=eps
+        self._sigma=fnc_eps_to_sig(self.f,eps)
+        self._n=np_sqrt(eps)
+        return
+    @property
+    def epsR(self):
+        """real part of dielectric function"""
+        return np_real(self._eps)
+    @property
+    def epsI(self):
+        """imaginary part of dielectric function"""
+        return np_imag(self._eps)
+    @property
+    def n(self):
+        """real part of index"""
+        return np_real(self._n)
+    @n.setter
+    def n(self,n):
+        self._n=n
+        self._eps=n*n
+        self._sigma=fnc_eps_to_sig(self.f,self._eps)
+        return
+    @property
+    def k(self):
+        """imaginary part of index"""
+        return np_imag(np_sqrt(self._n))
+    @property
+    def nComplex(self):
+        """complex index"""
+        return self._n
+    @property
+    def alpha(self):
+        """absorption coefficient"""
+        return 4*np_pi*self.nI*self.f*1e10/c

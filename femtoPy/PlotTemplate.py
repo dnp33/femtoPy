@@ -103,7 +103,7 @@ def sigma(fig=None,ax=None,sx=10,sy=7,nMinor=1,xlabel='frequency (THz)',
 def epsilon(fig=None,ax=None,sx=10,sy=7,nMinor=1,xlabel='frequency (THz)',
             twin=True,units='$F$ $m^{-1}$',cR='C1',cL='C0'):
     """
-    conductivity vs frequency plot
+    dielectric function vs frequency plot
 
     Parameters
     ----------
@@ -127,9 +127,9 @@ def epsilon(fig=None,ax=None,sx=10,sy=7,nMinor=1,xlabel='frequency (THz)',
         return fig,ax
 
 def index(fig=None,ax=None,sx=10,sy=7,nMinor=1,xlabel='frequency (THz)',
-          twin=True,cR='C1',cL='C0',y2=r'$\alpha (cm^{-1})$'):
+          twin=True,cR='C1',cL='C0',y2=r'$\alpha$ (cm$^{-1}$)'):
     """
-    conductivity vs frequency plot
+    complex vs frequency plot
 
     Parameters
     ----------
@@ -140,6 +140,7 @@ def index(fig=None,ax=None,sx=10,sy=7,nMinor=1,xlabel='frequency (THz)',
     which : extinction coefficient (k) or absorption coefficient (alpha)
     cR(cL) : color of right(left) axis/ticks/labels
     nMinor : default 1
+    y2 : default $\alpha$ (cm${^-1}$)
     """
     if type(fig)==type(None):
         fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
@@ -189,8 +190,8 @@ def wf2(fig=None,ax=None,sx=10,sy=7,nMinor=1,xlabel='time (ps)',
 
     return fig,ax
 
-def spec(fig=None,ax=None,sx=10,sy=7,nMinor=1,label='frequency',
-         units='THz',ylabel='mp. (a.u)'):
+def spec(fig=None,ax=None,sx=10,sy=7,nMinor=1,xlabel='frequency',
+         xunits='THz',ylabel='Amp.',yunits='a.u'):
     """
     spectrum plot
     
@@ -205,7 +206,7 @@ def spec(fig=None,ax=None,sx=10,sy=7,nMinor=1,label='frequency',
     """
     if type(fig)==type(None):
         fig,ax=figure(sx=sx,sy=sy,nMinor=nMinor)
-    ax.set_ylabel(ylabel)
+    ax.set_ylabel(ylabel+' ('+yunits+')')
     ax.set_xlabel(xlabel+' ('+xunits+')')
 
     return fig,ax

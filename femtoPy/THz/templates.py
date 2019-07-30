@@ -18,9 +18,8 @@ def wfAvg(cls,filename='',nMin=1,nAvg=2,invertTime=False,
     tCol : column with time data
     """
     dat=np_loadtxt(filename+str(nMin))
-    cls.nAvg=nAvg
     cls.t=dat[:,tCol]
-    cls.wfs=np_zeros((cls.t.size,cls.nAvg))
+    cls.wfs=np_zeros((cls.t.size,nAvg))
 
     for i in range(nMin,nMin+nAvg):
         cls.wfs[:,i-nMin]=np_loadtxt(filename+str(i))[:,1]
@@ -67,9 +66,8 @@ def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
     """
     dat=np_loadtxt(refFile+str(nMin))
     cls.ref.t=cls.samp.t=dat[:,tCol]
-    cls.ref.nAvg=nAvg; cls.samp.nAvg=nAvg
 
-    cls.ref.wfs=np_zeros((cls.t.size,cls.nAvg))
+    cls.ref.wfs=np_zeros((cls.t.size,nAvg))
     cls.samp.wfs=cls.ref.wfs.copy()
     for i in range(nMin,nMin+nAvg):
         cls.ref.wfs[:,i-nMin]=np_loadtxt(refFile+str(i))[:,wfCol]

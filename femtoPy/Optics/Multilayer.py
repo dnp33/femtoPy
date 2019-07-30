@@ -1,3 +1,9 @@
+"""
+class for simulating optical transmission through a multilayer film
+
+INCOMPLETE
+"""
+
 import numpy as np
 
 I=np.matrix([[1,0],[0,1]],dtype=complex)
@@ -17,6 +23,25 @@ I=np.matrix([[1,0],[0,1]],dtype=complex)
 # S21[0,0]=S21[1,1] /= S12[0,0] because the phase shift is different depending whether you're incident from the front or back
 class multiLayer:
     def __init__(self,eps_r=[1],l=[0],kx=0,ky=0,k0=1,verbose=False):
+        """
+        multilayer film class
+
+        Notes
+        -----
+        S12[0,0] != S21[0,0] because the phase shift is different when you are 
+        incident on the front vs the back (I don't remember why...)
+
+        Parameters
+        ----------
+        eps_r : complex dilectric function of each layer in a list
+        l : thickness of each layer in a list
+        kx : x wavevector (for non-normal incidence)
+        ky : y wavevector (for non-normal incidence)
+
+        Returns
+        -------
+        Sij -> 2x2 scattering matrix.
+        """
         assert type(eps_r)==list,'eps_r must be a list'
         assert type(l)==list,'l must be a list'
         
