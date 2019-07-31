@@ -1,3 +1,19 @@
+"""
+THz.wvf is a set of classes for waveforms, 1D spectroscopy, and 2D spectroscopy
+
+waveform
+--------
+single waveform
+
+spectroscopy1d
+--------------
+waveform + reference
+
+spectroscopy2d
+--------------
+2d waveform + references
+
+"""
 from numpy import amax as np_amax, amin as np_amin, where as np_where,\
     zeros as np_zeros, absolute as np_absolute, angle as np_angle,\
     unwrap as np_unwrap, flipud as np_flipud, sqrt as np_sqrt, \
@@ -380,3 +396,61 @@ class spectroscopy1D:
     def alpha(self):
         """absorption coefficient"""
         return 4*np_pi*self.nI*self.f*1e10/c
+
+    @property
+    def sigmaErr(self):
+        """error in complex index"""
+        return self._sigmaErr
+    @sigmaErr.setter
+    def sigmaErr(self,sigmaErr):
+        """
+        set error and calculate index and dielectric function errors
+        (calculations incomplete)
+        """
+        self._sigmaErr=sigmaErr
+        return
+    @property
+    def sigmaErrR(self):
+        """error in real index"""
+        return np_real(self._sigmaErr)
+    @property
+    def sigmaErrI(self):
+        """error in imaginary index"""
+        return np_imag(self._sigmaErr)
+    @property
+    def epsErr(self):
+        """error in complex index"""
+        return self._epsErr
+    @epsErr.setter
+    def epsErr(self,epsErr):
+        """
+        set dielectric function error and calculate index and conductivity error
+        """
+        self._epsErr=epsErr
+        self._nErr=np.sqrt(epsErr)
+        return 
+    @property
+    def epsErrR(self):
+        """error in real part of dielectric function"""
+        return np_real(self._epsErr)
+    @property
+    def epsErrI(self):
+        """error in imaginary part of the dielectric function"""
+        return np_imag(self._epsErr)
+    @property
+    def nErr(self):
+        """error in complex index"""
+        return self._nErr
+    @nErr.setter
+    def nErr(self,nErr):
+        """set index error and calc dielectric function & conductivity error"""
+        self._nErr=nErr
+        return
+    @property
+    def nErrR(self):
+        """real part of index error"""
+        return np_real(self._nErr)
+    @property
+    def nErrI(self):
+        """imaginary part of index error"""
+        return np_imag(self._nErr)

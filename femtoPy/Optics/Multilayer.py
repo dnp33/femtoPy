@@ -29,7 +29,8 @@ class multiLayer:
         Notes
         -----
         S12[0,0] != S21[0,0] because the phase shift is different when you are 
-        incident on the front vs the back (I don't remember why...)
+        incident on the front vs the back (this makes sense for, e.g, a mirror
+        on one side of your domain)
 
         Parameters
         ----------
@@ -37,6 +38,7 @@ class multiLayer:
         l : thickness of each layer in a list
         kx : x wavevector (for non-normal incidence)
         ky : y wavevector (for non-normal incidence)
+        k0 : wavevector (in units of l^-1)
 
         Returns
         -------

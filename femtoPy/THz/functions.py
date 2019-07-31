@@ -21,12 +21,13 @@ Spectroscopy Tools
 thinFilm : thinFilm(t,n=2,d=1) n->array or number, d->number
 thinFilm_mod :  thinFilm_mod(t,n=2,d=1,sigma=0) n->array or number, d->number, 
                                                 sigma->array or number
+
+thinFilmErr : thinFilmErr(sigma,sigmaErr,t,tErr,n,nErr,d,dErr)
 """
 
-from numpy import pi as np_pi; from numpy import conjugate as np_conj
-from numpy import where as np_where
-from femtoPy.Constants import eps0
-from femtoPy.Constants import imp0
+from numpy import pi as np_pi, conjugate as np_conj, sqrt as np_sqrt,\
+    where as np_where
+from femtoPy.Constants import eps0, imp0 
 
 def thinFilm(t,n=2,d=1):
     """
@@ -43,6 +44,31 @@ def thinFilm(t,n=2,d=1):
     """
     sigma=(n+1)*(1/t-1)
     return np_conj(sigma/imp0/d)
+
+def thinFilmErr(sigma,trans,transErr,n,nErr,d,dErr):
+    """
+    error from thin film formula
+
+    Notes
+    -----
+    assumes that the conductivity has already been calculated
+
+    Parameters
+    ----------
+    sigma : conductivity
+    trans : transmission
+    tErr : error in transmission
+    n : substrate index
+    nErr : error in substrate index
+    d : sample thickness
+    dErr : error in sample thickness
+    """
+    transErr=transErr/(trans**2*(1/trans-1))
+    nErr=nErr/(n+1)
+    dErr=dErr/d
+    sigmaErr=sigma*np_sqrt(transErr**2+nErr**2+dErr**2)
+    
+    return sigmaErr
 
 # modified thin film formula
 # INPUTS
