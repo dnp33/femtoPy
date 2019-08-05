@@ -1,0 +1,28 @@
+from femtoPy.Optics import Multilayer as mlt
+from matplotlib.pyplot import subplots
+from numpy import linspace, empty
+
+l=[0.]; eps_r=[2]
+
+# print(mlt.multiLayer.__init__.__doc__)
+k0=linspace(0.001,0.01,50)
+t=empty(k0.size,dtype=complex)
+
+nTrans=2
+epsTrans=nTrans*nTrans
+
+nRefl=2
+epsRefl=nRefl*nRefl
+for i in range(k0.size):
+    S=mlt.multiLayer(l=l,eps_r=eps_r,k0=k0[i],epsTrans=epsTrans,epsRefl=epsRefl)
+    t[i]=S.S12[0,0]
+
+# t=t*nTrans
+    
+n2=np.sqrt(epsTrans)
+fig,ax=subplots(figsize=(5,4))
+ax.plot(k0,np.absolute(t),color='k')
+ax.axhline(2*nTrans/(nRefl+nTrans),color='C0',dashes=(8,5))
+ax.axhline(2*nRefl/(nRefl+nTrans),color='C1',dashes=(8,5))
+
+ax.set_ylim(0,2)

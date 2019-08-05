@@ -83,31 +83,48 @@ class multiLayer:
         self.S21=I.copy()
 
         # calculate global scattering matrix
-        for i in range(1,self.N-1):
-            self.setS(self.star_product(self.S,self.layers[i].S))
-        self.setS(self.star_product(self.S,self.layers[-1].S))
-        self.setS(self.star_product(self.layers[0].S,self.S))
+        for i in range(1,self.N):
+            self.star_product(i)
+        self.star_product2()
 
         return
-
-    @property
-    def S(self):
-        return [[self.S11,self.S12],[self.S21,self.S22]]
     
     def setS(self,S):
-        self.S11=S[0][0]; self.S12=S[0][1]; self.S21=S[1][0]; self.S22=S[1][1]
+        self.S11=S[0]; self.S12=S[1]; self.S21=S[2]; self.S22=S[3]
+
+    # redheffer star product
+    def star_product(self,i):
+        M1=self.S12*np.linalg.inv((I-self.layers[i].S11*self.S22))
+        M2=self.layers[i].S12*np.linalg.inv(I-self.S22*self.layers[i].S11)
+        
+        self.S11=self.S11+M1*self.layers[i].S11*self.S21
+        self.S12=M1*self.layers[i].S12
+        self.S21=M2*self.S21
+        self.S22=self.layers[i].S11+M2*self.S22*self.layers[i].S12
+        
         return
     
-    def star_product(self,A,B):
-        M1=A[0][1]*np.linalg.inv(I-B[0][0]*A[1][1])
-        M2=B[1][0]*np.linalg.inv(I-A[1][1]*B[0][0])
+    def star_product2(self):
+        M1=self.layers[0].S12*np.linalg.inv((I-self.S11*self.layers[0].S22))
+        M2=self.S21*np.linalg.inv(I-self.layers[0].S22*self.S11)
 
-        S11=A[0][0]+M1*B[0][0]*A[1][0]
-        S12=M1*B[0][1]
-        S21=M2*A[1][0]
-        S22=B[1][1]+M2*A[1][1]*B[0][1]
+        self.S11=self.layers[0].S11+M1*self.S11*self.layers[0].S21
+        self.S12=M1*self.S12
+        self.S21=M2*self.layers[0].S21
+        self.S22=self.S22+M2*self.layers[0].S22*self.S12
+
+        return
+
+    def star_product3(self):
+        M1=self.S12*np.linalg.inv((I-self.layers[-1].S11*self.S22))
+        M2=self.layers[-1].S21*np.linalg.inv(I-self.S22*self.layers[-1].S11)
         
-        return [[S11,S12],[S21,S22]]
+        self.S11=self.S11+M1*self.layers[-1].S11*self.S21
+        self.S12=M1*self.layers[-1].S12
+        self.S21=M2*self.S21
+        self.S22=self.layers[-1].S22+M2*self.S22*self.layers[-1].S12
+        
+        return
 
     @property
     def N(self):
@@ -152,11 +169,6 @@ class transRegion:
 
         return
 
-    @property
-    def S(self):
-        return [[self.S11,self.S12],[self.S21,self.S22]]
-
-
 class reflRegion:
     def __init__(self,eps_r=1,kx=0,ky=0,
                  V_air=1j*np.matrix([[0,1],[-1,0]])):
@@ -194,10 +206,6 @@ class reflRegion:
         self.S22=B*Ainv
 
         return
-    @property
-    def S(self):
-        return [[self.S11,self.S12],[self.S21,self.S22]]
-
         
     
 # class to hold the information of each layer
@@ -243,7 +251,3 @@ class layer:
         self.S12=M2*self.X*(A-B*Ainv*B)
         
         return
-
-    @property
-    def S(self):
-        return [[self.S11,self.S12],[self.S12,self.S11]]
