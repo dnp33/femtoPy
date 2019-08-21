@@ -42,7 +42,7 @@ class waveform:
     """
     def __init__(self,loadFunc=None,peak_field=None,sens=None,tmin=None,
                  tmax=None,tShift=0,fmin=None,fmax=None,calc=True,
-                 **kwargs):
+                 invertTime=False,**kwargs):
         """
         this __init__ method initializes a waveform object with either a set of
         waveforms from an average or a single waveform. It calculates the 
@@ -63,6 +63,7 @@ class waveform:
         tmin/tmax : min/max time to keep
         fmin/fmax : range of frequencies with good signal/noise
         tShift : time shift
+        invertTime : invert direction of time if desired
         calc : calculate FFT/wf etc. automatically (default True)
         
         **kwargs : refer to loadFunc
@@ -71,9 +72,9 @@ class waveform:
         
         if type(loadFunc) != type(None):
             loadFunc(self,**kwargs)
-            if peak_field: self.scale(peak_field)
-            elif sens: self.scale(sens/10)
-            else: self.scale(1)
+            if invertTime: self.wf=np_flipud(self.wf)
+            if peak_field: self.normWf(); self.scaleWf(peak_field)
+            elif sens: self.scaleWf(sens/10)
             self.trimTime(tmin=tmin,tmax=tmax)
         
         return
@@ -98,12 +99,16 @@ class waveform:
         self.fft=np_mean(self.ffts,axis=1)
         self.fftErr=np_std(self.ffts,axis=1,ddof=1)/np_sqrt(self.wfs[0,:].size)
         return
-        
-    def scale(self,scale):
+    def normWf(self):
+        self.wf=self.wf/np_amax(self.wf)
+        self.wfs=self.wfs/np_amax(self.wfs)
+
+        if self.calc: self.FFT()
+        return
+    def scaleWf(self,scale):
         """
         scales waveform and wf avgs by scale
         """
-        scale=scale/np_amax(np_absolute(self.wf))
         if self.avg:
             self.wfs=self.wfs*scale
             self.calcWfAvg()
@@ -259,7 +264,7 @@ class spectroscopy1D:
     -------
     spec=THz.wvf.spectroscopy1D(syntheticSpecroscopy)
     """
-    def __init__(self,loadFunc,tmin=None,tmax=None,
+    def __init__(self,loadFunc,tmin=None,invertTime=False,tmax=None,
                  tShift=None,fmin=None,fmax=None,**kwargs):
         """
         this __init__ method initializes two waveform objects (reference &
@@ -281,6 +286,9 @@ class spectroscopy1D:
         self.ref=waveform(); self.samp=waveform()
         
         loadFunc(self,**kwargs)
+        if invertTime:
+            self.ref.wf=np_flipud(self.ref.wf)
+            self.samp.wf=np_flipud(self.samp.wf)
         self.shiftTime(tShift)
         self.trimTime(tmin=tmin,tmax=tmax)
         self.trimFreq(fmin=fmin,fmax=fmax)

@@ -2,7 +2,23 @@ from numpy import loadtxt as np_loadtxt,  zeros as np_zeros,\
     linspace as np_linspace, pi as np_pi, sin as np_sin,\
     flipud as np_flipud
 
-def wfAvg(cls,filename='',nMin=1,nAvg=2,invertTime=False,
+def wfDat(cls,t,wf,scale=1):
+    """
+    this function takes a time & waveform array to store in cls
+    
+    Parameters
+    ----------
+    cls : a waveform object
+    t : time array
+    wf : waveform array
+    scale : scales waveform (wf=wf*scale)
+    """
+    cls.t=t
+    cls.wf=wf
+
+    return
+
+def wfAvg(cls,filename='',nMin=1,nAvg=2,
           wfCol=1,tCol=0,err=True):
     """
     this function loads a set of waveforms that will be averaged in cls
@@ -13,7 +29,6 @@ def wfAvg(cls,filename='',nMin=1,nAvg=2,invertTime=False,
     filename : root name of files (e.g., ./waveforms/myWf)
     nMin : lowest number to use (probably 0 or 1)
     nAvg : number of averages
-    invertTime : flip direction of waveform (necessary for some file types)
     wfCol : coloumn with waveform data
     tCol : column with time data
     """
@@ -23,11 +38,10 @@ def wfAvg(cls,filename='',nMin=1,nAvg=2,invertTime=False,
 
     for i in range(nMin,nMin+nAvg):
         cls.wfs[:,i-nMin]=np_loadtxt(filename+str(i))[:,1]
-    if invertTime: cls.wfs=np_flipud(cls.wfs)
     
     return
 
-def wf(cls,filename='',invertTime=False,wfCol=1,tCol=0):
+def wf(cls,filename='',wfCol=1,tCol=0):
     """
     Function that loads a single waveform (no averaging)
     
@@ -35,19 +49,17 @@ def wf(cls,filename='',invertTime=False,wfCol=1,tCol=0):
     ----------
     cls : waveform object that will hold the data
     filename : name of waveform file
-    invertTime : switch direction of time (necessary for some file types)
     wfCol : column that holds waveform data
     tCol : column that holds time data
     """
     dat=np_loadtxt(filename)
     cls.t=dat[:,0]
     cls.wf=dat[:,1]
-    if invertTime: cls.wf=np_flipud(cls.wf)
     
     return
 
 def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
-           nMin=1,nAvg=2,invertTime=False ):
+           nMin=1,nAvg=2):
     """
     this function loads a set of reference & sample waveforms into waveform
     objects that are stored in cls, a spectroscopy1d object
@@ -62,7 +74,6 @@ def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
     sensSamp : sample " "
     nMin : minimum index of average (probably 0 or 1)
     nAvg : total number of averages
-    invertTime : switch direction of time (necessary for some file types)
     """
     dat=np_loadtxt(refFile+str(nMin))
     cls.ref.t=cls.samp.t=dat[:,tCol]
@@ -73,10 +84,6 @@ def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
         cls.ref.wfs[:,i-nMin]=np_loadtxt(refFile+str(i))[:,wfCol]
         cls.samp.wfs[:,i-nMin]=np_loadtxt(sampFile+str(i))[:,wfCol]
 
-    if invertTime:
-        cls.ref.wfs=np_flipud(cls.ref.wfs)
-        cls.samp.wfs=np_flipud(cls.samp.wfs)
-        
     return
     
 def TDS(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
