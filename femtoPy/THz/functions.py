@@ -26,7 +26,7 @@ thinFilmErr : thinFilmErr(sigma,sigmaErr,t,tErr,n,nErr,d,dErr)
 """
 
 from numpy import pi as np_pi, conjugate as np_conj, sqrt as np_sqrt,\
-    where as np_where
+    where as np_where,absolute as np_absolute
 from femtoPy.Constants import eps0, imp0 
 
 def thinFilm(t,n=2,d=1):
@@ -57,7 +57,7 @@ def thinFilmErr(sigma,trans,transErr,n,nErr,d,dErr):
     ----------
     sigma : conductivity
     trans : transmission
-    tErr : error in transmission
+    transErr : error in transmission
     n : substrate index
     nErr : error in substrate index
     d : sample thickness
@@ -66,7 +66,7 @@ def thinFilmErr(sigma,trans,transErr,n,nErr,d,dErr):
     transErr=transErr/(trans**2*(1/trans-1))
     nErr=nErr/(n+1)
     dErr=dErr/d
-    sigmaErr=sigma*np_sqrt(transErr**2+nErr**2+dErr**2)
+    sigmaErr=np_absolute(sigma)*np_sqrt(transErr**2+nErr**2+dErr**2)
     
     return sigmaErr
 

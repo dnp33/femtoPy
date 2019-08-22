@@ -134,3 +134,12 @@ def syntheticWaveform(cls,t=np_linspace(-10,10,200),tau=1,t0=0,f0=1,E0=1):
 def syntheticSpec1d(cls):
     """This function is not yet written"""
     return
+
+def TRTS2dDat(cls,folder):
+    cls.tPump=np.loadtxt(folder+'tPump.dat')
+    cls.tTHz=np.loadtxt(folder+'tTHz.dat')
+    cls.ref=np.loadtxt(folder+'ref.dat')
+    cls.pump=np.loadtxt(folder+'pump.dat')
+
+    return
+    
