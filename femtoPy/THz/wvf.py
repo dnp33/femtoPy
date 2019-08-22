@@ -18,7 +18,7 @@ from numpy import amax as np_amax, amin as np_amin, where as np_where,\
     zeros as np_zeros, absolute as np_absolute, angle as np_angle,\
     unwrap as np_unwrap, flipud as np_flipud, sqrt as np_sqrt, \
     mean as np_mean, std as np_std, real as np_real, imag as np_imag,\
-    append as np_append, pi as np_pi
+    append as np_append, pi as np_pi, meshgrid as np_meshgrid
 from numpy.fft import rfft as fft_rfft, rfftfreq as fft_rfftfreq
 from scipy.signal import hilbert as sgn_hilbert
 from femtoPy.THz.functions import eps_to_sig as fnc_eps_to_sig,\
@@ -476,7 +476,8 @@ class spectroscopy2d:
     """
     class for 2d dT scans
     """
-    def __init__(self,loadFunc,tmin=None,tmax=None,fmin=None,fmax=None):
+    def __init__(self,loadFunc,tmin=None,tmax=None,
+                 fmin=None,fmax=None,**kwargs):
         """
         load data into the class
 
@@ -487,20 +488,20 @@ class spectroscopy2d:
         fmin : minimum frequency to keep for calculation
         fmax : maximum " "
         """
-        loadFunc(self)
+        loadFunc(self,**kwargs)
 
         self.dT=self.pump-self.ref
 
-        self.refFFT=np_rfft(self.ref,axis=1)
-        self.pumpFFT=np_rfft(self.pump,axis=1)
+        self.refFFT=fft_rfft(self.ref,axis=1)
+        self.pumpFFT=fft_rfft(self.pump,axis=1)
         self.trans=self.pumpFFT/self.refFFT
         
-        self.f=np_rfftfreq(self.tTHz.size,self.tTHz[1]-self.tTHz[0])
+        self.f=fft_rfftfreq(self.tTHz.size,self.tTHz[1]-self.tTHz[0])
         self.fX,self.fY=np_meshgrid(self.f,self.tPump)
         
         return
     
-    def calcSigma(self,func,**kargs,deconv=False):
+    def calcSigma(self,func,deconv=False,**kwargs):
         self.sigma=np_empty(self.trans.shape,dtype=complex)
         for i in range(self.tPump.size):
             self.sigma[i,:]=func(self.trans[i,:],**kwargs)
@@ -508,11 +509,11 @@ class spectroscopy2d:
 
     def reGrid(self,noise_dT=3,noise_avg=3):
         self.tPumpSkew,self.dTskew=Skew(self.tTHz,self.tPump,self.dT,noise_dT)
-        self.dTSkewFFT=np_rfft(self.dTskew,axis=1)
+        self.dTSkewFFT=fft_rfft(self.dTskew,axis=1)
         
         self.tPumpSkew,self.avgSkew=Skew(self.tTHz,self.tPump,
                                          self.avg,noise_avg)
-        self.avgSkewFFT=np_rfft(self.avgSkew,axis=1)
+        self.avgSkewFFT=fft_rfft(self.avgSkew,axis=1)
                     
         return
 
@@ -526,7 +527,7 @@ class spectroscopy2d:
             self.avgSkewFFT[i,:loc]=self.avgSkewFFT[i,:loc]/G_w[:loc]
 
         self.dTskew=np_irfft(self.dTSkewFFT,axis=1)
-        self.avgSkewFFT=np_irfft(self.avgSkewFFT,axis=1)
+        self.avgSkewFFT=fft_irfft(self.avgSkewFFT,axis=1)
 
         self.dTdeconv=unSkew(self.tTHz,self.tPump,self.tPumpSkew,self.dTskew)
         self.avgDeconv=unSkew(self.tTHz,self.tPump
@@ -534,141 +535,8 @@ class spectroscopy2d:
         self.refDeconv=self.avgDeconv-self.dTdeconv
         self.pumpDeconv=self.avgDeconv+self.dTdeconv
 
-        self.refFFTdeconv=np_rfft(self.refDeconv,axis=1)
-        self.pumpFFTdeconv=np_rfft(self.pumpDeconv,axis=1)
+        self.refFFTdeconv=fft_rfft(self.refDeconv,axis=1)
+        self.pumpFFTdeconv=fft_rfft(self.pumpDeconv,axis=1)
         self.transDeconv=self.pumpFFTdeconv/self.refFFTdeconv
                                 
         return
-    @property
-    def sigma(self):
-        """complex conductivity"""
-        return self._sigma
-    @sigma.setter
-    def sigma(self,sigma):
-        """
-        set complex conductivity & calc epsilon/n
-        
-        Notes
-        -----
-        sets epsilon(0) & n(0) to 1 because of the diverging f^-1 term
-        """
-        self._sigma=sigma
-        f,self._eps=fnc_sig_to_eps(self.f,sigma)
-        if self._eps.size < self.f.size:
-            self._eps=np_append(1,self._eps)
-        self.n=np_sqrt(self._eps)
-        return
-    @property
-    def sigmaR(self):
-        """real part of conductivity"""
-        return np_real(self._sigma)
-    @property
-    def sigmaI(self):
-        """imaginary part of conductivity"""
-        return np_imag(self._sigma)
-    @property
-    def eps(self):
-        """complex dielectric function"""
-        return self._eps
-    @eps.setter
-    def eps(self,eps):
-        """set dielectric function & calculate conductivity/index"""
-        self._eps=eps
-        self._sigma=fnc_eps_to_sig(self.f,eps)
-        self._n=np_sqrt(eps)
-        return
-    @property
-    def epsR(self):
-        """real part of dielectric function"""
-        return np_real(self._eps)
-    @property
-    def epsI(self):
-        """imaginary part of dielectric function"""
-        return np_imag(self._eps)
-    @property
-    def n(self):
-        """real part of index"""
-        return np_real(self._n)
-    @n.setter
-    def n(self,n):
-        self._n=n
-        self._eps=n*n
-        self._sigma=fnc_eps_to_sig(self.f,self._eps)
-        return
-    @property
-    def k(self):
-        """imaginary part of index"""
-        return np_imag(np_sqrt(self._n))
-    @property
-    def nComplex(self):
-        """complex index"""
-        return self._n
-    @property
-    def alpha(self):
-        """absorption coefficient"""
-        return 4*np_pi*self.k*self.f*1e10/c
-
-    @property
-    def sigmaErr(self):
-        """error in complex index"""
-        return self._sigmaErr
-    @sigmaErr.setter
-    def sigmaErr(self,sigmaErr):
-        """
-        set error and calculate index and dielectric function errors
-        (calculations incomplete)
-        """
-        self._sigmaErr=sigmaErr
-
-        # note I'm treating w=0 as 1 then setting epsErr(w=0) to that of the
-        # minimum finite frequency error to avoid divide by zero
-        w=2*np_pi*self.f*1e12; w[0]=1
-        self._epsErr=1j*sigmaErr/w/eps0
-        self._epsErr[0]=self.epsErr[1]
-        self._nErr=np_sqrt((1j*self._epsErr/2/np_sqrt(self.eps))**2)
-        return
-    @property
-    def sigmaErrR(self):
-        """error in real index"""
-        return np_real(self._sigmaErr)
-    @property
-    def sigmaErrI(self):
-        """error in imaginary index"""
-        return np_imag(self._sigmaErr)
-    @property
-    def epsErr(self):
-        """error in complex index"""
-        return self._epsErr
-    @epsErr.setter
-    def epsErr(self,epsErr):
-        """
-        set dielectric function error and calculate index and conductivity error
-        """
-        self._epsErr=epsErr
-        self._nErr=np.sqrt(epsErr)
-        return 
-    @property
-    def epsErrR(self):
-        """error in real part of dielectric function"""
-        return np_real(self._epsErr)
-    @property
-    def epsErrI(self):
-        """error in imaginary part of the dielectric function"""
-        return np_imag(self._epsErr)
-    @property
-    def nErr(self):
-        """error in complex index"""
-        return self._nErr
-    @nErr.setter
-    def nErr(self,nErr):
-        """set index error and calc dielectric function & conductivity error"""
-        self._nErr=nErr
-        return
-    @property
-    def nErrR(self):
-        """real part of index error"""
-        return np_real(self._nErr)
-    @property
-    def nErrI(self):
-        """imaginary part of index error"""
-        return np_imag(self._nErr)

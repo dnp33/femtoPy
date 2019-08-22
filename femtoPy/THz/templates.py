@@ -85,6 +85,36 @@ def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
         cls.samp.wfs[:,i-nMin]=np_loadtxt(sampFile+str(i))[:,wfCol]
 
     return
+
+def spec1dAvg(cls,file,Col1=1,Col2=3,sens1=1000,sens2=5,nAvg=5,nMin=1):
+    """
+    import data from L2 lab format
+
+    Parameters
+    ----------
+    Col1 : lock-in ?? column in data file
+    Col2 : lock-in ?? column in data file
+    sens1 : r.r/4 ??? lock-in sensitivity 
+    sens2 : r.r/2 ??? lock-in sensitivity
+    nAvg : number of averages
+    nMin : minimum index of average (probably 0 or 1)
+    """
+    dat=np_loadtxt(file+'_Average')
+    cls.ref.t=cls.samp.t=dat[:,0]
+    refWfs=np_zeros((cls.t.size,nAvg))
+    sampWfs=np_zeros((cls.t.size,nAvg))
+
+    for i in range(nMin,nMin+nAvg):
+        dat=np_loadtxt(file+'_run_0')
+        L10=dat[:,Col1]*sqrt(2)*sens1
+        L20=dat[:,Col2]*sens2
+        refWfs[:,i]=L10+L20
+        sampWfs[:,i]=L10-L20
+
+    cls.ref.wfs=refWfs; cls.samp.wfs=sampWfs
+
+    return
+    
     
 def TDS(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
          invertTime=False):
@@ -136,10 +166,22 @@ def syntheticSpec1d(cls):
     return
 
 def TRTS2dDat(cls,folder):
-    cls.tPump=np.loadtxt(folder+'tPump.dat')
-    cls.tTHz=np.loadtxt(folder+'tTHz.dat')
-    cls.ref=np.loadtxt(folder+'ref.dat')
-    cls.pump=np.loadtxt(folder+'pump.dat')
+    """
+    This function loads data that has been stored in folder into the 
+    spectroscopy2d class
+
+    Notes
+    -----
+    the naming convention of files in the folder is currently fixed:
+    pump time delay -> tPump.dat
+    THz-EO/pump delay -> tTHz.dat
+    reference waveforms -> ref.dat
+    pump waveforms -> pump.dat
+    """
+    cls.tPump=np_loadtxt(folder+'tPump.dat')
+    cls.tTHz=np_loadtxt(folder+'tTHz.dat')
+    cls.ref=np_loadtxt(folder+'ref.dat')
+    cls.pump=np_loadtxt(folder+'pump.dat')
 
     return
     
