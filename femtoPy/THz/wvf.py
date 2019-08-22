@@ -72,7 +72,9 @@ class waveform:
         
         if type(loadFunc) != type(None):
             loadFunc(self,**kwargs)
-            if invertTime: self.wf=np_flipud(self.wf)
+            if invertTime:
+                self.ref.wf=np_flipud(self.ref.wf)
+                self.samp.wf=np_flipud(self.samp.wf)
             if peak_field: self.normWf(); self.scaleWf(peak_field)
             elif sens: self.scaleWf(sens/10)
             self.trimTime(tmin=tmin,tmax=tmax)
@@ -287,8 +289,8 @@ class spectroscopy1D:
         
         loadFunc(self,**kwargs)
         if invertTime:
-            self.ref.wf=np_flipud(self.ref.wf)
-            self.samp.wf=np_flipud(self.samp.wf)
+            self.ref.wfs=np_flipud(self.ref.wfs)
+            self.samp.wfs=np_flipud(self.samp.wfs)
         self.shiftTime(tShift)
         self.trimTime(tmin=tmin,tmax=tmax)
         self.trimFreq(fmin=fmin,fmax=fmax)
@@ -403,7 +405,7 @@ class spectroscopy1D:
     @property
     def alpha(self):
         """absorption coefficient"""
-        return 4*np_pi*self.nI*self.f*1e10/c
+        return 4*np_pi*self.k*self.f*1e10/c
 
     @property
     def sigmaErr(self):
