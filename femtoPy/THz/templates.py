@@ -1,6 +1,6 @@
 from numpy import loadtxt as np_loadtxt,  zeros as np_zeros,\
     linspace as np_linspace, pi as np_pi, sin as np_sin,\
-    flipud as np_flipud
+    flipud as np_flipud, sqrt as np_sqrt
 
 def wfDat(cls,t,wf,scale=1):
     """
@@ -92,6 +92,7 @@ def spec1dAvg(cls,file,Col1=1,Col2=3,sens1=1000,sens2=5,nAvg=5,nMin=1):
 
     Parameters
     ----------
+    file : path to root file name
     Col1 : lock-in ?? column in data file
     Col2 : lock-in ?? column in data file
     sens1 : r.r/4 ??? lock-in sensitivity 
@@ -99,14 +100,14 @@ def spec1dAvg(cls,file,Col1=1,Col2=3,sens1=1000,sens2=5,nAvg=5,nMin=1):
     nAvg : number of averages
     nMin : minimum index of average (probably 0 or 1)
     """
-    dat=np_loadtxt(file+'_Average')
+    dat=np_loadtxt(file+'_Average.txt')
     cls.ref.t=cls.samp.t=dat[:,0]
     refWfs=np_zeros((cls.t.size,nAvg))
     sampWfs=np_zeros((cls.t.size,nAvg))
 
     for i in range(nMin,nMin+nAvg):
-        dat=np_loadtxt(file+'_run_0')
-        L10=dat[:,Col1]*sqrt(2)*sens1
+        dat=np_loadtxt(file+'_run_'+str(i)+'.txt')
+        L10=dat[:,Col1]*np_sqrt(2)*sens1
         L20=dat[:,Col2]*sens2
         refWfs[:,i]=L10+L20
         sampWfs[:,i]=L10-L20
