@@ -9,6 +9,6 @@ setup(
     url='http://github.com/dnp33/femtoPy',
     author='David N. Purschke',
     author_email='purschke@ualberta.ca',
-    packages=['femtoPy','femtoPy/Diffusion','femtoPy/Bloch','femtoPy/THz','femtoPy/Optics'],
+    packages=['femtoPy','femtoPy/Diffusion','femtoPy/Bloch','femtoPy/THz','femtoPy/Optics','femtoPy/Relax'],
     keywords='femtosecond terahertz picosecond diffusion scattering-matrices',
 )
