@@ -59,7 +59,7 @@ def wf(cls,filename='',wfCol=1,tCol=0):
     return
 
 def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
-           nMin=1,nAvg=2):
+           nMin=1,nAvg=2,ext='.txt'):
     """
     this function loads a set of reference & sample waveforms into waveform
     objects that are stored in cls, a spectroscopy1d object
@@ -74,15 +74,19 @@ def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
     sensSamp : sample " "
     nMin : minimum index of average (probably 0 or 1)
     nAvg : total number of averages
+    ext : file extension (default .txt)
     """
-    dat=np_loadtxt(refFile+str(nMin))
+    dat=np_loadtxt(refFile+str(nMin)+ext)
     cls.ref.t=cls.samp.t=dat[:,tCol]
 
-    cls.ref.wfs=np_zeros((cls.t.size,nAvg))
-    cls.samp.wfs=cls.ref.wfs.copy()
+    refWfs=np_zeros((cls.t.size,nAvg))
+
+    sampWfs=refWfs.copy()
     for i in range(nMin,nMin+nAvg):
-        cls.ref.wfs[:,i-nMin]=np_loadtxt(refFile+str(i))[:,wfCol]
-        cls.samp.wfs[:,i-nMin]=np_loadtxt(sampFile+str(i))[:,wfCol]
+        refWfs[:,i-nMin]=np_loadtxt(refFile+str(i)+ext)[:,wfCol]
+        sampWfs[:,i-nMin]=np_loadtxt(sampFile+str(i)+ext)[:,wfCol]
+
+    cls.ref.wfs=refWfs; cls.samp.wfs=sampWfs
 
     return
     
