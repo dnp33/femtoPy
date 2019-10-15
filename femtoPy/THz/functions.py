@@ -113,6 +113,33 @@ def Drude(f,DC=17500,tau=0.18):
     w=2*np_pi*f
     return DC/(1-1j*w*tau)
 
+# calculate susceptibility from the Lorentz model
+# INPUTS
+# amp=oscillator strength
+# f0=resonant frequency
+# gamma=damping constant
+def ChiLorentz(f,amp,f0=1.5,gamma=0.1):
+    """
+    dielectric function of a Lorentz oscillator
+    
+    Notes
+    -----
+    uses convention that Im{chi} is positive. The amplitude is currently a.u
+
+    Parameters
+    ----------
+    amp : oscillator strength
+    f0 : resonant frequency
+    gamma : damping constant
+
+    Returns
+    -------
+    epsilon
+    """
+    w0=2*np_pi*f0
+    w=2*np_pi*f
+    return amp/(w0**2-w**2-1j*gamma*w)
+
 # calculate dielectric function from Lorentz model
 # INPUTS
 # epsInf=high frequency dielectric function
@@ -141,6 +168,7 @@ def Lorentz(f,epsInf=1,epsSt=1.1,f0=1.5,gamma=0.1):
     w0=2*np_pi*f0
     w=2*np_pi*f
     return epsInf+(epsSt-epsInf)*w0**2/(w0**2-w**2-1j*gamma*w)
+
 
 
 # INPUTS
