@@ -42,7 +42,7 @@ def thinFilm(trans,n=2,d=1):
     -------
     conductivity (in Siemann's/unit(d)
     """
-    sigma=(n+1)*(1/t-1)
+    sigma=(n+1)*(1/trans-1)
     return np_conj(sigma/imp0/d)
 
 def thinFilmErr(sigma,trans,transErr,n,nErr,d,dErr):
