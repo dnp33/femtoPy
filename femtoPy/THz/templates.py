@@ -59,7 +59,7 @@ def wf(cls,filename='',wfCol=1,tCol=0):
     return
 
 def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
-           nMin=1,nAvg=2):
+           nMin=1,nAvg=2,ext='.txt',flip=True):
     """
     this function loads a set of reference & sample waveforms into waveform
     objects that are stored in cls, a spectroscopy1d object
@@ -74,15 +74,22 @@ def TDSavg(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
     sensSamp : sample " "
     nMin : minimum index of average (probably 0 or 1)
     nAvg : total number of averages
+    ext : file extension (default .txt)
     """
-    dat=np_loadtxt(refFile+str(nMin))
+    dat=np_loadtxt(refFile+str(nMin)+ext)
     cls.ref.t=cls.samp.t=dat[:,tCol]
 
-    cls.ref.wfs=np_zeros((cls.t.size,nAvg))
-    cls.samp.wfs=cls.ref.wfs.copy()
+    refWfs=np_zeros((cls.t.size,nAvg))
+
+    sampWfs=refWfs.copy()
     for i in range(nMin,nMin+nAvg):
-        cls.ref.wfs[:,i-nMin]=np_loadtxt(refFile+str(i))[:,wfCol]
-        cls.samp.wfs[:,i-nMin]=np_loadtxt(sampFile+str(i))[:,wfCol]
+        refWfs[:,i-nMin]=np_loadtxt(refFile+str(i)+ext)[:,wfCol]
+        sampWfs[:,i-nMin]=np_loadtxt(sampFile+str(i)+ext)[:,wfCol]
+
+    if flip:
+        refWfs=np_flipud(refWfs); sampWfs=np_flipud(sampWfs)
+
+    cls.ref.wfs=refWfs; cls.samp.wfs=sampWfs
 
     return
 
@@ -118,7 +125,7 @@ def spec1dAvg(cls,file,Col1=1,Col2=3,sens1=1000,sens2=5,nAvg=5,nMin=1):
     
     
 def TDS(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
-         invertTime=False):
+         flip=True):
     """
     this function loads a reference & sample waveform into a waveform
     objects that are stored in cls, a spectroscopy1d object
@@ -135,6 +142,9 @@ def TDS(cls,refFile='',sampFile='',tCol=0,wfCol=1,sensRef=1,sensSamp=1,
     """
     ref=np_loadtxt(refFile)
     samp=np_loadtxt(sampFile)
+    if flip:
+        ref[:,wfCol]=np_flipud(ref[:,wfCol])
+        samp[:,wfCol]=np_flipud(samp[:,wfCol])
     cls.ref.t=cls.samp.t=ref[:,tCol]
     cls.ref.wf=ref[:,wfCol]*sensRef
     cls.samp.wf=samp[:,wfCol]*sensSamp
