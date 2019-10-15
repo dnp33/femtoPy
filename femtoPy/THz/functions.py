@@ -29,7 +29,7 @@ from numpy import pi as np_pi, conjugate as np_conj, sqrt as np_sqrt,\
     where as np_where,absolute as np_absolute
 from femtoPy.Constants import eps0, imp0 
 
-def thinFilm(t,n=2,d=1):
+def thinFilm(trans,n=2,d=1):
     """
     basic thin film formula (needs reference)
 
