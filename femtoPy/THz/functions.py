@@ -9,12 +9,14 @@ Note, uses convention that Im{sigma} is positive in the Drude model &
 **
 Drude : Drude(f,DC=17500,tau=0.18) returns sigma
 Lorentz : Lorentz(f,epsInf=1,epsSt=1.1,f0=1.5,gamma=0.1) returns epsilon
-Drude-Smith : DrudeSmith(f,tau,sigmaDC,c)
+Drude-Smith : DrudeSmith(f,tau,sigmaDC,c) returns sigma
+ChiLorentz : ChiLorentz(f,amp,f0,gamma) returns electric susceptibility
 
 Conversion Tools
 ----------------
 conductivity to dielectric function : sig_to_eps(f,sigma)
 dielectric function to conductivity : eps_to_sig(f,eps)
+susceptibility to conductivity : chi_to_sig(f,chi)
 
 Spectroscopy Tools
 ------------------
@@ -74,7 +76,7 @@ def thinFilmErr(sigma,trans,transErr,n,nErr,d,dErr):
 # INPUTS
 # "" "" 
 # sigma=bare conductivity of film
-def thinFilm_mod(t,n=2,d=1,sigma=0):
+def thinFilm_mod(trans,n=2,d=1,sigma=0):
     """
     modified thin film formula (needs derivation)
 
@@ -88,7 +90,7 @@ def thinFilm_mod(t,n=2,d=1,sigma=0):
     conductivity (in S/unit(d)
     """
     nEff=n+sigma*d*imp0
-    return thinFilm(t,nEff,d)
+    return thinFilm(trans,nEff,d)
 
 # calculate conductivity from Drude model
 # INPUTS
@@ -170,10 +172,7 @@ def Lorentz(f,epsInf=1,epsSt=1.1,f0=1.5,gamma=0.1):
     return epsInf+(epsSt-epsInf)*w0**2/(w0**2-w**2-1j*gamma*w)
 
 
-
-# INPUTS
-
-def DrudeSmith(f,tau,sigmaDC,c):
+def DrudeSmith(f,tau=0.03,sigmaDC=1,c=0.5):
     """
     calculate conductivity from Drude-Smith model
     
@@ -211,13 +210,25 @@ def sig_to_eps(f,sigma):
     w=2*np_pi*f*1e12
     return f,1+1j*sigma/(w*eps0)
 
+def chi_to_sig(f,chi):
+    """
+    calculates the conductivity from the susceptibility
+
+    Parameters
+    ----------
+    f : driving frequency (THz)
+    chi : susceptibility
+    """
+    w=2*np_pi*f*1e12
+    return -1j*chi*eps0*w
+
 def eps_to_sig(f,eps):
     """
     calculates the conductivity from the dielectric function
 
     Parameters
     ----------
-    f : drive frequency
+    f : drive frequency (THz)
     eps : dielectric function
     """
     w=2*np_pi*f*1e12
