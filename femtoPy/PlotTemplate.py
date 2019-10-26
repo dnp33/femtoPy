@@ -261,16 +261,28 @@ def AC(fig=None,ax=None,sx=10,sy=7,nMinor=1,ylabel='AC trace (a.u)',
     ax.set_xlabel(xlabel)
     return fig,ax
 
-def minorTicker(ax,nMinor=1):
-    """sets the number of minor ticks to nMinor"""
+def minorTicker(ax,nMinor=1,which='both'):
+    """
+    sets the number of minor ticks
+
+    Parameters
+    ----------
+    ax : axis to modify
+    nMinor : number of minor ticks (default 1)
+    which : which axis to modify (default both, optionally select only x or y)
+    """
     axType=type(ax)
     if axType==type(np_array([])) or axType==type([]):
         for i in range(len(ax)):
-            ax[i].xaxis.set_minor_locator(plt_aml(nMinor+1))
-            ax[i].yaxis.set_minor_locator(plt_aml(nMinor+1))
+            if which=='x' or which=='both':
+                ax[i].xaxis.set_minor_locator(plt_aml(nMinor+1))
+            if which=='y' or which=='both':
+                ax[i].yaxis.set_minor_locator(plt_aml(nMinor+1))
     else:
-        ax.xaxis.set_minor_locator(plt_aml(nMinor+1))
-        ax.yaxis.set_minor_locator(plt_aml(nMinor+1))
+        if which=='x' or which=='both':
+            ax.xaxis.set_minor_locator(plt_aml(nMinor+1))
+        if which=='y' or which=='both':
+            ax.yaxis.set_minor_locator(plt_aml(nMinor+1))
 
     return 
 
