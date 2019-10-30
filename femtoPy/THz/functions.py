@@ -172,7 +172,7 @@ def Lorentz(f,epsInf=1,epsSt=1.1,f0=1.5,gamma=0.1):
     return epsInf+(epsSt-epsInf)*w0**2/(w0**2-w**2-1j*gamma*w)
 
 
-def DrudeSmith(f,tau=0.03,sigmaDC=1,c=0.5):
+def DrudeSmith(f,tau=0.03,sigmaDC=1,c=-0.5):
     """
     calculate conductivity from Drude-Smith model
     
@@ -187,7 +187,7 @@ def DrudeSmith(f,tau=0.03,sigmaDC=1,c=0.5):
     -------
     sigma
     """
-    sigmaDC=(1-c)*sigmaDC
+    sigmaDC=sigmaDC/(1+c)
     w=2*np_pi*f
     const=1-1j*w*tau
     return sigmaDC*(1+c/const)/const
