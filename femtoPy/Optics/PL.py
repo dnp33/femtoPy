@@ -9,10 +9,11 @@ class PLspec:
         self.Eg=Eg
         self.E=E
         self.gamma=gamma
-        self.alpha0=band_tail_alpha(self.E-self.Eg,gamma=self.gamma,
-                                    alpha0=alpha0,theta=theta)
-        a_k0=1-np.exp(-self.alpha0)
-        self.CONST=E*E*a_k0
+#        self.alpha0=band_tail_alpha(self.E-self.Eg,gamma=self.gamma,
+#                                    alpha0=alpha0,theta=theta)
+#        a_k0=1-np.exp(-self.alpha0)
+        self.CONST=alpha0
+        self.alpha0=alpha0
         self.dy=grid.dy
         self.PL=np.zeros((E.size,grid.time().size))
         if dist==0:
@@ -21,6 +22,8 @@ class PLspec:
             self.i=0
             self.calcPL(dist)
         self.i=1
+
+        self.dt=grid.dt
 
         return
 
@@ -73,8 +76,8 @@ class PLspec:
         return
 
     def sum(self):
-        self.spec=np.sum(self.PL,axis=1)
-        self.int=np.sum(self.spec)
+        self.spec=np.sum(self.PL,axis=1)*self.dt
+        self.integ=np.sum(self.spec)
 
         return
 

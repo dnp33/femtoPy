@@ -192,6 +192,27 @@ def DrudeSmith(f,tau=0.03,sigmaDC=1,c=-0.5):
     const=1-1j*w*tau
     return sigmaDC*(1+c/const)/const
 
+def DrudeSmithMod(f,tau=0.03,tauDif=0.03,sigmaDC=1,c=-0.5):
+    """
+    calculate conductivity from modified Drude-Smith model
+    
+    Parameters
+    ----------
+    f : drive frequency
+    tau : scattering time, default 0.03 ps
+    tauDif : diffusive restoring time constant, default 0.03 ps
+    sigmaDC : DC conductivity, default 1
+    c : localization parameter, default -0.5
+
+    Returns
+    -------
+    sigma
+    """
+    sigmaDC=sigmaDC/(1+c)
+    w=2*np_pi*f
+    const=1-1j*w*tau
+    return sigmaDC*(1+c/(1-1j*w*tauDif))/const
+
 def sig_to_eps(f,sigma):
     """
     calculate dielectric function from conductivity
