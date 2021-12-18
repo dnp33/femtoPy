@@ -1,5 +1,7 @@
 """
-THz.functions is set of tools useful for THz spectroscopy
+THz.functions is set of tools useful for THz spectroscopy. Most functions 
+have doc strings that give an example of the usage. The functions that are 
+categorized as follows: 
 
 Conductivity Models
 -------------------
@@ -37,8 +39,8 @@ def thinFilm(trans,n=2,d=1):
 
     Parameters
     ----------
-    n : substrate index (can be imaginary/dispersive)
-    d : film thickness (in desired units)
+    n : substrate index (can be imaginary and/or dispersive, default 2)
+    d : film thickness (in desired units, eg. units of um gives S/um, default 1)
     
     Returns
     -------
@@ -49,7 +51,7 @@ def thinFilm(trans,n=2,d=1):
 
 def thinFilmErr(sigma,trans,transErr,n,nErr,d,dErr):
     """
-    error from thin film formula
+    error from thin film formula. THIS IS INCOMPLETE..
 
     Notes
     -----
@@ -72,32 +74,24 @@ def thinFilmErr(sigma,trans,transErr,n,nErr,d,dErr):
     
     return sigmaErr
 
-# modified thin film formula
-# INPUTS
-# "" "" 
-# sigma=bare conductivity of film
-def thinFilm_mod(trans,n=2,d=1,sigma=0):
+def thinFilm_mod(trans,n=2,d_film=1,d_exc=1,sigma_film=0):
     """
-    modified thin film formula (needs derivation)
+    modified thin film formula as used in 
 
     Parameters
     ----------
-    n,d : see thinFilm
-    sigma : unexcited film conductivity (must be in units(d))
+    n : substrate index (can be complex and/or dispersive, default 2)
+    d_un : unexcited film thickness (must have units consistent w/ sigma & d_exc)
+    d_exc : thickness of excited region of thin film
+    sigma_film : unexcited film conductivity (must be in units(d))
     
     Returns
     -------
     conductivity (in S/unit(d)
     """
-    nEff=n+sigma*d*imp0
-    return thinFilm(trans,nEff,d)
+    nEff=n+sigma_film*d_film*imp0
+    return thinFilm(trans,nEff,d_exc)
 
-# calculate conductivity from Drude model
-# INPUTS
-# f=frequency
-# DC=DC conductivity
-# tau=scattering time
-# uses convention that sigma_imag is positive
 def Drude(f,DC=17500,tau=0.18):
     """
     Drude conductivity
@@ -115,11 +109,6 @@ def Drude(f,DC=17500,tau=0.18):
     w=2*np_pi*f
     return DC/(1-1j*w*tau)
 
-# calculate susceptibility from the Lorentz model
-# INPUTS
-# amp=oscillator strength
-# f0=resonant frequency
-# gamma=damping constant
 def ChiLorentz(f,amp,f0=1.5,gamma=0.1):
     """
     dielectric function of a Lorentz oscillator
@@ -142,12 +131,6 @@ def ChiLorentz(f,amp,f0=1.5,gamma=0.1):
     w=2*np_pi*f
     return amp/(w0**2-w**2-1j*gamma*w)
 
-# calculate dielectric function from Lorentz model
-# INPUTS
-# epsInf=high frequency dielectric function
-# epsSt=low frequency dielectric function
-# f0=resonant frequency
-# gamma=damping constant
 def Lorentz(f,epsInf=1,epsSt=1.1,f0=1.5,gamma=0.1):
     """
     dielectric function of a Lorentz oscillator
@@ -213,35 +196,30 @@ def DrudeSmithMod(f,tau=0.03,tauDif=0.03,sigmaDC=1,c=-0.5):
     const=1-1j*w*tau
     return sigmaDC*(1+c/(1-1j*w*tauDif))/const
 
-def sig_to_eps(f,sigma):
+def sig_to_eps(f,sigma,eps_bg=1):
     """
     calculate dielectric function from conductivity
     
+    Notes
+    -----
+    returns both the frequency array and the conductivity. This is done to avoid the 
+    divergence that comes with dividing by f. In the case where 0 is not part of the 
+    frequency array, the returned f is the same as the input
+
     Parameters
     ----------
     f : Drive frequency
     sigma : complex conductivity
+    eps_bg : background dielectric constant (default 1)
     
     Returns
     -------
-    epsilon
+    f,epsilon : frequency and dielectric function
     """
     sigma=sigma[np_where(f != 0)]
     f=f[np_where(f !=0)]
     w=2*np_pi*f*1e12
-    return f,1+1j*sigma/(w*eps0)
-
-def chi_to_sig(f,chi):
-    """
-    calculates the conductivity from the susceptibility
-
-    Parameters
-    ----------
-    f : driving frequency (THz)
-    chi : susceptibility
-    """
-    w=2*np_pi*f*1e12
-    return -1j*chi*eps0*w
+    return f,eps_bg+1j*sigma/(w*eps0)
 
 def eps_to_sig(f,eps):
     """
@@ -254,6 +232,18 @@ def eps_to_sig(f,eps):
     """
     w=2*np_pi*f*1e12
     return -1j*(eps-1)*eps0*w
+
+def chi_to_sig(f,chi):
+    """
+    calculates the conductivity from the susceptibility
+
+    Parameters
+    ----------
+    f : driving frequency (THz)
+    chi : susceptibility
+    """
+    w=2*np_pi*f*1e12
+    return -1j*chi*eps0*w
 
 # make an FFT figure w/ amplitude & phase
 def fftFig(figsize=(10,8),left=.13,right=.87,mid=.7,top=.9,bottom=.13,hspace=0):
