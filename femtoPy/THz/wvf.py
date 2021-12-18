@@ -323,9 +323,15 @@ class spectroscopy1D:
         self.samp.trimFreq(fmin=fmin,fmax=fmax)
         
         if fmin or fmax: self.transTrim=self.samp.fftTrim/self.ref.fftTrim
-
-        return
-        
+        try: self._sigma
+        except: pass
+        else:
+            if fmin:
+                loc=np_where(self.ref.f >= fmin)
+                self.sigmaTrim=self.sigma[loc]
+            if fmax:
+                self.sigmaTrim=self.sigmaTrim[:self.ref.fTrim.size]
+    
     @property
     def t(self):
         """time vector"""
