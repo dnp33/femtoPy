@@ -1,37 +1,16 @@
 """
-class for simulating optical transmission through a multilayer film
-
-INCOMPLETE
+class for simulating optical transmission through a multilayer film. see Multilayer.multilayer._doc__ for more details on usage.
 """
 
 import numpy as np
 
 I=np.matrix([[1,0],[0,1]],dtype=complex)
-    
-# class to hold all the layers in a multilayer structure
-# USAGE: INPUTS
-# layer (complex) dielectric constant & thickness stored in eps_r & l respectively
-# k0 must be in units of l^-1 (e.g., k0=um^-1 & l=um)
-# 
-# kx & ky in normalized units (i.e., kx=cos(theta)sin(phi), ky=sin(theta)sin(phi))
-# set kx=ky=0 for normal incidence (oblique incidence untested)
 
-# USAGE: OUTPUTS
-# Sij is a 2x2 matrix
-# S11[0,0]=S11[11]=S22[0,0]=S22[1,1]= field transmission coefficient
-# S12[0,0]=S12[1,1]= field reflection coefficient
-# S21[0,0]=S21[1,1] /= S12[0,0] because the phase shift is different depending whether you're incident from the front or back
 class multiLayer:
     def __init__(self,eps_r=[1],epsTrans=None,epsRefl=None,l=[0],
                  kx=0,ky=0,k0=1):
         """
         multilayer film class
-
-        Notes
-        -----
-        S12[0,0] != S21[0,0] because the phase shift is different when you are 
-        incident on the front vs the back (this makes sense for, e.g, a mirror
-        on one side of your domain)
 
         Parameters
         ----------
@@ -51,14 +30,56 @@ class multiLayer:
         S21 -> transmission from left to right
         S12 -> transmission from right to left
 
-        device :
+        typically, we consider light to be incident from left to right so that
+	transmission/reflection through a multilayer film is given by:
            left                                    right
-        refl region - layer 1 - layer 2 - ... - trans region
-
+        refl region - layer 1 - layer 2 - ... - layer n - trans region
+	
+	Each Sij is a matrix, the components of which indicate polarizations. 
+	Defined with x,y in the plane and z the propagation direction, the following
+	convention holds:
         Sij[0,0]=Px -> Px
            [1,1]=Py -> Py
            [0,1]=Px -> Py
            [1,0]=Py -> Px
+
+	** THERE IS NO ANISOTROPY BUILT INTO THE CODE YET, so the off-diagonal
+	components should always be zero and the on diagonal components should be 
+	the same.
+
+        Usage:
+	------
+	for transmission from vacuum through a two layer film (eps_1=2+0.1i, l_1=1 
+	and eps_2=3+0.2i, l_2=0.5) into a substrate with eps=4 at a wavevector of 1:
+	
+	import Multilayer as ml
+	
+	eps_layers=[2+0.1*1j,1+0.2*1j]
+	l_layers=[1,0.5]
+	eps_refl=1
+	eps_trans=4
+
+	k0=1
+
+	film=ml.multilayer(k0=k0,l=l_layers,eps_r=eps_layers,epsRefl=eps_refl
+ 			,epsTrans=epsTrans)
+
+	t=film.S21[1,1]
+	r=film.S11[1,1]
+
+	print('transmissivity: {:.3f}'.format(t))
+	print('reflectivity: {:.3f}'.format(r))
+
+        Notes
+        -----
+        -At one point I was confused because S12[0,0] != S21[0,0] even when the left/right 		dielectric functions were equal. This happens because the phase shift is different
+	when you are incident on the front vs the back (this makes sense for, e.g, a mirror
+        on one side of your domain)
+
+	-I still have a bit of confusion over the sign convention. I believe that this 
+	calculator expects a positive imaginary part of the dielectric constant for 
+	absorption and negative imaginary part for gain, but this should be confirmed 
+	by the user.
         """
         assert type(eps_r)==list,'eps_r must be a list'
         assert type(l)==list,'l must be a list'
