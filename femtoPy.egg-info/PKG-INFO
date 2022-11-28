@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: femtoPy
+Version: 0.1
+Summary: Python code for data analysis and simulation of ultrafast phenomenon
+Home-page: http://github.com/dnp33/femtoPy
+Author: David N. Purschke
+Author-email: purschke@ualberta.ca
+License: UNKNOWN
+Description: UNKNOWN
+Keywords: femtosecond terahertz picosecond diffusion scattering-matrices
+Platform: UNKNOWN

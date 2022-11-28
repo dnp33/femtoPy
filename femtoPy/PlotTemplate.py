@@ -23,6 +23,65 @@ from matplotlib.pyplot import subplots as mpl_subplots
 from matplotlib.ticker import AutoMinorLocator as plt_aml
 from numpy import array as np_array
 
+from matplotlib.colors import LinearSegmentedColormap
+
+cdict = {'blue':   [[0.0,  0.0, 0.0],
+                    [0.25, 1.0, 1.0],
+                   [0.5,  0.0, 0.0],
+                    [0.75, 0.0, 0.0],
+                   [1.0,  0.0, 0.0]],     
+         'red':    [[0.0,  0.0, 0.0],
+                    [0.25, 0.0, 0.0],
+                   [0.5, 0.0, 0.0],
+                    [0.75, 1.0, 1.0],
+                   [1.0, 1.0, 1.0]],
+         'green':  [[0.0,  0.0, 0.0],
+                    [0.25, 0.0, 0.0],
+                   [0.5,  1.0, 1.0],
+                    [0.75, 1.0, 1.0],
+                   [1.0,  0.0, 0.0]]}
+
+cmap0 = LinearSegmentedColormap('cmap_1', segmentdata=cdict, N=256)
+
+cdict = {'blue':   [[0.0,  0.0, 0.0],
+                    [0.125,1.0,1.0],
+                    [0.25, 1.0, 1.0],
+                   [0.5,  0.0, 0.0],
+                    [0.75, 0.0, 0.0],
+                   [1.0,  0.0, 0.0]],     
+         'red':    [[0.0,  0.0, 0.0],
+                    [0.125, 1.0, 1.0],
+                    [0.25, 0.0, 0.0],
+                   [0.5, 0.0, 0.0],
+                    [0.75, 1.0, 1.0],
+                   [1.0, 1.0, 1.0]],
+         'green':  [[0.0,  0.0, 0.0],
+                    [0.25, 0.0, 0.0],
+                   [0.5,  1.0, 1.0],
+                    [0.75, 1.0, 1.0],
+                   [1.0,  0.0, 0.0]]}
+
+cmap1 = LinearSegmentedColormap('cmap_1', segmentdata=cdict, N=256)
+
+
+cdict = {'blue':   [[0.0,  1.0, 1.0],
+                    [0.25, 1.0, 1.0],
+                   [0.5,  0.0, 0.0],
+                    [0.75, 0.0, 0.0],
+                   [1.0,  0.0, 0.0]],     
+         'red':    [[0.0,  1.0, 1.0],
+                    [0.25, 0.0, 0.0],
+                   [0.5, 0.0, 0.0],
+                    [0.75, 1.0, 1.0],
+                   [1.0, 1.0, 1.0]],
+         'green':  [[0.0,  1.0, 1.0],
+                    [0.25, 0.0, 0.0],
+                   [0.5,  1.0, 1.0],
+                    [0.75, 1.0, 1.0],
+                   [1.0,  0.0, 0.0]]}
+
+cmap2 = LinearSegmentedColormap('cmap_1', segmentdata=cdict, N=256)
+
 def figure(sx=10,sy=7,nMinor=1,fmt=None,**kwargs):
     """
     Returns a figure of size sx by sy (default 10x7) with a single axis.
